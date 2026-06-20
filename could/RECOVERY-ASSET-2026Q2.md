@@ -10,6 +10,11 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:recovery 2026-06-14 08:29 → OG worker and Pages Function both implement graceful degradation with abort timeouts
+## ASSET:recovery 2026-06-20 19:23 → Analysis only — no files changed
+
+Two recovery gaps identified (see corresponding ISSUE entry). No code was modified in this run. Affected files if actioned:
+- `frontend/functions/recipe/[token].js` — static fallback OG image
+- `og-worker/src/index.js` — WASM init error handling
 ## ASSET:recovery 2026-06-15 20:02 → Fix empty utility, add ErrorBoundary, add retry button to SharedRecipe error state
 
 Priority 1 — Implement announcementNote.js (breaking fix):
