@@ -10,6 +10,12 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:instruction 2026-06-14 08:29 → `useAnnouncementNoteManager` is correctly memoized on the exact recipe fields that produce notes
+## ASSET:instruction 2026-06-20 19:23 → Analysis only — no files changed
+
+Three structural improvements identified (see corresponding ISSUE entry). No code was modified in this run. Affected files:
+- `frontend/src/pages/SharedRecipe.jsx` — error boundary, API constant
+- `frontend/functions/recipe/[token].js` — API constant
+- `og-worker/src/index.js` — WASM init guard
 ## ASSET:instruction 2026-06-15 20:02 → Create README.md covering architecture, deploy steps, and service wiring
 
 Create frontend/README.md (or root README.md) with:
