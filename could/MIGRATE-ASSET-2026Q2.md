@@ -10,6 +10,12 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:migrate 2026-06-14 08:29 → Stack is current; Cloudflare Pages + Workers architecture is well-matched
+## ASSET:migrate 2026-06-20 19:23 → Analysis only — no files changed
+
+Three migration items identified (see corresponding ISSUE entry). None actioned in this run. Relevant files if actioned:
+- `frontend/index.html` — twitter card attribute convention
+- `frontend/wrangler.toml`, `og-worker/wrangler.toml` — compatibility_date bump
+- `og-worker/` — satori migration would replace `@resvg/resvg-wasm` and `src/index.js`
 ## ASSET:migrate 2026-06-15 20:02 → Migration checklist: React 19 + Vite 6 + react-router-dom v7
 
 Packages to upgrade:
