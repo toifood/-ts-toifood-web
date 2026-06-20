@@ -10,6 +10,34 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:test 2026-06-14 08:29 → Zero tests across all packages; no testing framework installed
+## ISSUE:test 2026-06-20 19:23 → Zero test coverage — three priority test targets identified
+
+No test files exist anywhere in this repo. No Vitest, Jest, or any test runner is configured. `frontend/package.json` has no test script.
+
+**Priority 1 — `wrapTitle` unit tests** `og-worker/src/index.js`
+This function has a known bug (word dropped when second line fills exactly). Test cases:
+- Single word shorter than `maxChars` → `['word']`
+- Title fitting on one line → `['full title']`
+- Title needing two lines normally → `['line one', 'line two']`
+- Title where second line fills exactly 26 chars and next word triggers split → confirm that triggering word is NOT dropped (currently fails)
+- Title with a single very long word exceeding `maxChars` → `['longword']`
+- Empty string → `[]`
+
+**Priority 2 — Pages Function regex pipeline** `frontend/functions/recipe/[token].js`
+Create a fixture of the `index.html` content and run the 7 regex replacement operations against it. Assert:
+- `<title>` is replaced correctly
+- `og:title`, `og:description`, `og:image` properties are replaced
+- `twitter:title`, `twitter:description`, `twitter:image` are replaced
+- No duplicate meta tags appear after replacement
+- HTML returned to crawler contains no residual default values when recipe data is present
+
+**Priority 3 — `announcementNote.js` utility** `frontend/src/utils/announcementNote.js`
+- `resolveNote(null)` → `null`
+- `resolveNote('  ')` → `null` (whitespace trimmed)
+- `resolveNote('text')` → `{ text: 'text', type: 'note' }`
+- `resolveDietaryAllergyNote(['GlutenFree', 'NutFree'], DIETARY_INFO)` → warning with both allergens
+- `resolveDietaryAllergyNote(['Vegan'], DIETARY_INFO)` → `null` (no criticalAllergen)
+- `resolveDietaryInfoNote(['Keto', 'Halal'], DIETARY_INFO)` → headsup with both guidelines
 ## ISSUE:test 2026-06-15 20:02 → Zero test infrastructure — no unit tests, no E2E tests, no test runner configured
 
 The repo has no test infrastructure:
