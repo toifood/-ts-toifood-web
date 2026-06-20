@@ -10,6 +10,11 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:bug 2026-06-14 08:29 → Pages Function OG meta regex correctly exploits tag structure to avoid double-closing
+## ASSET:bug 2026-06-20 19:23 → Analysis only — no files changed
+
+Four bugs identified (see corresponding ISSUE entry). No code was modified in this run. All bugs are in existing files:
+- `frontend/functions/recipe/[token].js` — og:image URL, dimensions, twitter attribute convention
+- `og-worker/src/index.js` — wrapTitle word-drop
 ## ASSET:bug 2026-06-15 20:02 → Fix stubs for announcementNote, fix twitter meta regexes, fix FAQ scroll timing
 
 Fix 1 — announcementNote.js minimum stubs to prevent crash:
