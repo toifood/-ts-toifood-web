@@ -10,6 +10,19 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:bug 2026-06-14 08:29 → `wrapTitle` in OG worker silently drops trailing words when a title fills both lines exactly
+## ISSUE:bug 2026-06-20 19:23 → Three live bugs: og:image URL regression, 2× dimension mismatch, and wrapTitle word-drop still unfixed
+
+**Bug 1 (HIGH) — og:image URL regression** `frontend/functions/recipe/[token].js`
+`ogImage` is currently set to `https://api.toifood.co.nz/recipes/public/${token}/og-image`, but the 2026-04-27 ASSET entry confirmed the intent was `https://og.toifood.co.nz/${token}` (the dedicated resvg-wasm Worker). The og-worker is still deployed at `og.toifood.co.nz` (wrangler.toml: `name = "toifood-og"`) and is not being referenced by the Pages Function. Either a regression occurred or the backend added its own `/og-image` route — currently unverified. Until resolved, social crawlers may receive a different (or missing) OG image than the Worker generates.
+
+**Bug 2 (MEDIUM) — og:image dimensions 2× actual** `frontend/functions/recipe/[token].js`
+The injected meta tags declare `og:image:width=2400` and `og:image:height=1260`, but the og-worker renders at `W=1200, H=630` (`og-worker/src/index.js` lines `const W = 1200, H = 630`). Declared dimensions are 2× the actual PNG output. Some social platforms (e.g. LinkedIn) reject or distort images where declared and actual dimensions disagree.
+
+**Bug 3 (MEDIUM) — wrapTitle word-drop still unfixed** `og-worker/src/index.js`
+Previously logged 2026-06-14. When a title's second line fills to exactly ≤26 chars and the next word triggers `lines.length === 2`, the code sets `current = ''` and breaks — that word is silently discarded with no ellipsis. Example: `"Slow Roasted Lamb Shoulder With Herb Crust"` — the word `"Crust"` is dropped from the OG image text. Fix: replace `current = ''; break;` with `lines.push(current); break;` before resetting.
+
+**Bug 4 (LOW) — twitter meta attribute convention flip** `frontend/functions/recipe/[token].js`
+`index.html` uses `property="twitter:title"` / `property="twitter:description"` / `property="twitter:image"`. The Pages Function regex correctly matches these but replaces them with `name="twitter:..."`. After processing, the served HTML has a mix: `og:*` tags use `property=`, twitter tags use `name=`. No functional breakage (both are accepted by crawlers), but the inconsistency with the source convention is confusing.
 ## ISSUE:bug 2026-06-15 20:02 → Three bugs: empty utility crash, twitter meta regex mismatch, FAQ scroll timing
 
 Bug 1 (CRITICAL) — frontend/src/utils/announcementNote.js is empty. useAnnouncementNoteManager imports resolveNote, resolveDietaryAllergyNote, resolveDietaryInfoNote from it. These exports do not exist. SharedRecipe throws TypeError on any recipe that has announcement note fields.
