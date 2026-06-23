@@ -10,6 +10,23 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:bug 2026-06-14 08:29 → Pages Function OG meta regex correctly exploits tag structure to avoid double-closing
+## ASSET:bug 2026-06-23 22:01 → Defensive patterns inventory — all external calls have timeouts, XSS guards, and graceful fallbacks
+
+**Fetch safety** (`og-worker/src/index.js:50–65, 67–78`)
+Both the recipe API fetch and the Twemoji image fetch are guarded with `AbortController` + `setTimeout(3000)`. Neither error propagates; the worker always returns a valid PNG response regardless of upstream failure.
+
+**XSS / SVG-injection guards**
+- `escapeHtml` in `frontend/functions/recipe/[token].js` wraps all user-supplied title, description, and image URL strings before injecting into HTML.
+- `escapeXml` in `og-worker/src/index.js` escapes recipe title and emoji before embedding in SVG markup, preventing SVG injection through recipe content.
+
+**Memory leak prevention** (`frontend/src/hooks/useReveal.js:9,13`)
+`IntersectionObserver.disconnect()` is called both in the observed callback (on intersection) and in the `useEffect` cleanup. Elements are never left observed after unmount or after the reveal fires.
+
+**Cloudflare CDN caching** (`og-worker/src/index.js:52`, `frontend/functions/recipe/[token].js:37`)
+Both the og-worker and the Pages function set `cf: { cacheTtl: 300 }` on upstream recipe fetches, keeping backend load low under social-share bursts.
+
+**Announcement note null safety** (`frontend/src/utils/announcementNote.js:11`)
+`resolveNote` trims and null-checks the input string before returning; `AnnouncementNote.jsx` also guards on `!config || !config.text` before rendering, preventing blank note cards from empty AI-generated fields.
 ## ASSET:web 2026-06-23 21:00 → API error handling and OG worker fallbacks are solid throughout
 
 **1. SharedRecipe error state** (`frontend/src/pages/SharedRecipe.jsx` ~L476-485)
