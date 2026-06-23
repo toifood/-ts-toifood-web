@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:test 2026-06-14 08:29 → Utility functions and hooks are structured for easy unit testing
+## ASSET:test 2026-06-24 09:32 → Core logic is isolated in pure functions and a single hook, making test adoption low-friction
+
+`frontend/src/utils/announcementNote.js` exports three pure functions with no side effects and no DOM or network dependencies. Adding Vitest and writing unit tests for all branching paths (empty tags, mixed allergen/guideline tags, null text) would take under an hour and give high-confidence coverage of the allergy-warning path.
+
+`frontend/src/hooks/useAnnouncementNoteManager.js` wraps all note resolution in a single `useMemo` with a flat dependency array of primitives. It is self-contained enough to test end-to-end with `@testing-library/react`'s `renderHook`, covering the full `descriptionNote → dietaryAllergyNote → longRecipeNote` output surface in one pass.
+
+`og-worker/src/index.js` separates `wrapTitle`, `emojiCodepoint`, and `escapeXml` as named functions before the `fetch` handler. They can be imported and unit-tested with Node's built-in test runner (`node --test`) without spinning up a Worker runtime, since they have no Cloudflare-specific API dependencies.
 ## ASSET:test 2026-06-24 09:00 → Codebase structure is highly amenable to testing with minimal setup
 
 **Pure utility functions are ready to unit-test today**
