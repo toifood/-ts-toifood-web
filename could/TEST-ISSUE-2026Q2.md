@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:test 2026-06-14 08:29 → Zero tests across all packages; no testing framework installed
+## ISSUE:test 2026-06-24 09:32 → Zero test infrastructure; complex branching logic and worker utilities are entirely unverified
+
+`frontend/package.json` lists no test framework (no Vitest, Jest, or Testing Library). There are no `.test.jsx`, `.spec.js`, or any other test files anywhere in the repository. As a result:
+
+- `frontend/src/utils/announcementNote.js` contains three exported functions (`resolveNote`, `resolveDietaryAllergyNote`, `resolveDietaryInfoNote`) with branching allergen-filtering and guideline-joining logic. A one-character typo in the `criticalAllergen` property name would silently produce empty allergy warnings for users with serious dietary restrictions — with no tests to catch it.
+- `og-worker/src/index.js` contains `wrapTitle` (multi-line text truncation), `emojiCodepoint` (Unicode codepoint extraction with variation-selector stripping), and `escapeXml` (attribute sanitisation). These are pure, stateless functions that run on every OG image request and have never been executed in a test harness.
+- `frontend/src/pages/SharedRecipe.jsx` manages five distinct UI states (loading, error, recipe-only, recipe+author, recipe+full-profile) plus a countdown timer — all are exercised only via live network requests against the production API.
 ## ISSUE:test 2026-06-24 09:00 → Zero tests exist across frontend and og-worker — critical utility logic is unverified
 
 Neither `frontend/package.json` nor `og-worker/package.json` lists a testing framework. No test files appear in the tree (`*.spec.ts`, `*.test.ts`, `*.test.jsx`, or similar). Every path through the application is entirely untested. The highest-priority gaps:
