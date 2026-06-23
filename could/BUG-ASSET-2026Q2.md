@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:bug 2026-06-14 08:29 → Pages Function OG meta regex correctly exploits tag structure to avoid double-closing
+## ASSET:bug 2026-06-24 09:32 → Defensive patterns in place reduce crash surface across fetch and rendering paths
+
+`og-worker/src/index.js` wraps both the recipe API fetch and the Twemoji fetch in independent `try/catch` blocks with 3-second `AbortController` timeouts. Failures in either path fall back gracefully: the title defaults to `'A recipe from toifood'` and the emoji renders as an inline SVG `<text>` element rather than an embedded image. The worker always returns a valid PNG response regardless of upstream availability.
+
+`frontend/src/hooks/useReveal.js` correctly calls `observer.disconnect()` both in the effect return (cleanup on unmount) and immediately after the element becomes visible, preventing IntersectionObserver callbacks from firing after the component has cleaned up.
+
+`frontend/src/utils/announcementNote.js` exports pure functions with explicit null-guards (`text?.trim()`, `.filter(Boolean)`) that make the note resolution predictable and side-effect-free — any breakage is isolated to that module.
 ## ASSET:bug 2026-06-24 09:00 → Timer cleanup and OG edge caching are implemented correctly
 
 **Timer interval cleanup is safe**
