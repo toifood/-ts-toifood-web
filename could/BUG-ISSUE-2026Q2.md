@@ -10,6 +10,16 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:bug 2026-06-14 08:29 → `wrapTitle` in OG worker silently drops trailing words when a title fills both lines exactly
+## ISSUE:bug 2026-06-23 22:01 → Three confirmed bugs: dead utility function, broken emoji OG fallback, and inconsistent Twitter meta attribute rewrite
+
+**1. `formatMemberSince` is dead code** (`frontend/src/pages/SharedRecipe.jsx:136`)
+Defined at the top of the file but never called anywhere in the JSX. `formatCookDuration` is used, but `formatMemberSince` is not. Causes confusion and will drift out of sync with any future date-formatting changes.
+
+**2. OG-image emoji fallback silently broken** (`og-worker/src/index.js:60–75`)
+When the Twemoji CDN fetch fails or returns non-OK (e.g. for compound/unknown emoji), the SVG falls back to a native `<text>` element containing the raw emoji character. `resvg-wasm` is a Rust-based SVG renderer with no system emoji font; it will render the glyph as a blank box or tofu. The catch block swallows the error silently, so the OG image is delivered with no emoji and no signal to the caller.
+
+**3. Cloudflare Pages function rewrites Twitter `property=` to `name=`** (`frontend/functions/recipe/[token].js:27–32`)
+`index.html` declares all Twitter card tags with `property=` (matching the OG convention used throughout the file). The Pages function regexes correctly match on `property=`, but the replacement strings switch to `name=` for `twitter:title`, `twitter:description`, and `twitter:image`. The page therefore leaves the request with a mixed-attribute set. Both attributes are accepted by Twitter's crawler in practice, but the inconsistency creates a maintenance trap — the next developer who aligns to spec by switching `index.html` to `name=` will break the Pages function match silently.
 ## ISSUE:web 2026-06-23 21:00 → Four bugs — timer no-reset, OG tag regex fragility, window.location in render, og-worker twemoji CDN age
 
 **Bug 1 — Timer cannot be restarted after reaching zero** (`frontend/src/pages/SharedRecipe.jsx` ~L441-451)
