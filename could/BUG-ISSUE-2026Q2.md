@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:bug 2026-06-14 08:29 → `wrapTitle` in OG worker silently drops trailing words when a title fills both lines exactly
+## ISSUE:bug 2026-06-24 09:32 → Nested profile fetch in SharedRecipe is not cancelled on unmount
+
+In `frontend/src/pages/SharedRecipe.jsx` the initial recipe fetch chains a second `fetch` for the author profile (line ~219–224) inside a `.then()` callback. Unlike the outer fetch, this inner call has no `AbortController` and is not cancelled when the component unmounts. If a user navigates away before the profile resolves, React receives a `setFullProfile` call on an unmounted component and logs a warning; in edge cases where the token changes via client-side navigation the stale profile could flash into view for the new recipe.
+
+The `formatMemberSince` function (line 136–139) is defined at module scope but never called anywhere in the component — the component uses inline `authorDur` logic and `formatCookDuration` instead. Dead code that will mislead future contributors.
+
+In `og-worker/src/index.js`, `emojiCodepoint('')` on an empty emoji string returns `''`, constructing the URL `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/.png`. A network request is still dispatched to that invalid path before the `try/catch` absorbs the failure, adding unnecessary latency on every OG render for recipes with no emoji.
 ## ISSUE:bug 2026-06-24 09:00 → Three runtime bugs in SharedRecipe and og-worker need fixing
 
 **1. SharedRecipe.jsx — fetch calls have no AbortController (lines 212–244)**
