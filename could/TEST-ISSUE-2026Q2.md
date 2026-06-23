@@ -10,6 +10,18 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:test 2026-06-14 08:29 → Zero tests across all packages; no testing framework installed
+## ISSUE:test 2026-06-24 09:00 → Zero tests exist across frontend and og-worker — critical utility logic is unverified
+
+Neither `frontend/package.json` nor `og-worker/package.json` lists a testing framework. No test files appear in the tree (`*.spec.ts`, `*.test.ts`, `*.test.jsx`, or similar). Every path through the application is entirely untested. The highest-priority gaps:
+
+**1. `frontend/src/utils/announcementNote.js` — pure functions with zero tests**
+`resolveNote`, `resolveDietaryAllergyNote`, and `resolveDietaryInfoNote` contain business logic that gates what safety warnings users see (allergen and dietary notices). These are pure functions with no dependencies — trivially unit-testable, but entirely uncovered. A silent regression here could suppress a critical allergen warning.
+
+**2. `og-worker/src/index.js` — `wrapTitle` and `escapeXml` have no tests**
+`wrapTitle` (26-char wrapping, 2-line max) and `escapeXml` (SVG injection guard) are also pure and testable in isolation. A boundary error in `wrapTitle` produces a malformed or visually broken OG image for any shared recipe link.
+
+**3. No E2E or integration test for the SharedRecipe fetch pipeline**
+The two-step fetch (recipe then author profile) and the resulting render of dietary/allergen notes, timer state, and author card is the core feature of this web app and has no integration coverage at all.
 ## ISSUE:test 2026-06-23 22:01 → Zero test infrastructure — no runner, no scripts, no test files anywhere in the repo
 
 Neither `frontend/package.json` nor `og-worker/package.json` declares a `test` script or any testing dependency (no vitest, jest, testing-library, playwright, or miniflare). The git tree contains no `*.spec.*` or `*.test.*` files.
