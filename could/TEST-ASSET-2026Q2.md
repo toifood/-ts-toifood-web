@@ -10,6 +10,31 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:test 2026-06-14 08:29 → Utility functions and hooks are structured for easy unit testing
+## ASSET:test 2026-06-23 22:01 → Testable pure-function surface is large and dependency-free — high ROI for a first test pass
+
+**Immediately unit-testable (no DOM, no network, no Cloudflare env):**
+
+`og-worker/src/index.js`
+- `escapeXml(str)` — 5 edge cases (ampersand, angle brackets, quote, empty string, already-escaped)
+- `emojiCodepoint(emoji)` — single emoji, compound ZWJ sequence, emoji with variation selector (fe0f strip), empty string
+- `wrapTitle(title, maxChars)` — one-word title, exactly-at-limit word, long single word exceeding maxChars, empty string, > 2 lines truncation
+- `bufToBase64(buf)` — round-trip against `atob` reference
+
+`frontend/src/utils/announcementNote.js`
+- `resolveNote(text, type)` — null, undefined, whitespace-only, valid string
+- `resolveDietaryAllergyNote(tags, info)` — empty tags, tags with no allergen, one allergen, multiple allergens
+- `resolveDietaryInfoNote(tags, info)` — same matrix
+
+`frontend/functions/recipe/[token].js` (testable as string transforms)
+- HTML fixture containing all six meta tags → verify each regex replaces correctly and does not duplicate tags
+- HTML fixture missing `og:image` tag → verify graceful no-op
+
+**Integration-testable with lightweight harnesses:**
+- `og-worker`: Cloudflare Miniflare v3 (`wrangler dev --local`) can exercise the full fetch handler with mock `ASSETS` binding
+- `frontend/functions`: Cloudflare Pages local mode (`wrangler pages dev`) supports full function testing against the built dist
+
+**Inline functions worth extracting for testability** (`SharedRecipe.jsx:136–151`):
+`formatMemberSince` and `formatCookDuration` are date-formatting helpers defined inline. Moving them to a shared utils file makes them directly unit-testable without mounting the component.
 ## ASSET:test 2026-06-20 19:23 → Analysis only — no files changed
 
 Zero test coverage confirmed, three priority test targets identified (see corresponding ISSUE entry). No test files were created in this run. To set up:
