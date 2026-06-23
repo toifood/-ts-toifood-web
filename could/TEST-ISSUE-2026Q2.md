@@ -10,6 +10,19 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:test 2026-06-14 08:29 → Zero tests across all packages; no testing framework installed
+## ISSUE:test 2026-06-23 22:01 → Zero test infrastructure — no runner, no scripts, no test files anywhere in the repo
+
+Neither `frontend/package.json` nor `og-worker/package.json` declares a `test` script or any testing dependency (no vitest, jest, testing-library, playwright, or miniflare). The git tree contains no `*.spec.*` or `*.test.*` files.
+
+**Highest-risk untested paths:**
+
+1. **`og-worker/src/index.js` — OG image rendering pipeline** is the only place `@resvg/resvg-wasm` is exercised. The emoji codepoint extraction, SVG template assembly, and WASM PNG render are entirely black-box. The silent emoji fallback bug described in BUG-ISSUE would have been caught by a single unit test for `emojiCodepoint('')`.
+
+2. **`frontend/functions/recipe/[token].js` — HTML meta-tag injection** replaces six regex patterns against live `index.html` content. Any change to `index.html` meta structure can silently break OG/Twitter preview cards. There are no snapshot or fixture tests to catch this.
+
+3. **`frontend/src/utils/announcementNote.js`** — dietary allergy and info notes are generated from tag combinations. Edge cases (empty tag array, unknown tag, multiple critical allergens) are only validated manually in production.
+
+**Recommended next step:** add vitest to `frontend/` and a Miniflare-based test harness to `og-worker/`. Both packages already have no framework lock-in that would complicate adoption.
 ## ISSUE:test 2026-06-20 19:23 → Zero test coverage — three priority test targets identified
 
 No test files exist anywhere in this repo. No Vitest, Jest, or any test runner is configured. `frontend/package.json` has no test script.
