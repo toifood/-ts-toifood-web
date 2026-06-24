@@ -10,6 +10,20 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:bug 2026-06-14 08:29 → Pages Function OG meta regex correctly exploits tag structure to avoid double-closing
+## ASSET:bug 2026-06-24 19:10 → Injection guards and cross-browser icon loading are correctly implemented throughout
+
+**`escapeHtml` applied to all injected values** (`frontend/functions/recipe/[token].js`)
+All three dynamic values — `title`, `description`, and `ogImage` — pass through `escapeHtml` before interpolation into the HTML template. The function escapes `&`, `<`, `>`, and `"`, covering both attribute-value injection and HTML-entity encoding. A recipe title containing `"` or `<` cannot break the injected meta tag structure or escalate into script injection.
+
+**Ionicons loaded with correct ESM + nomodule fallback** (`frontend/index.html`)
+```html
+<script type="module" src="https://unpkg.com/ionicons@7.2.1/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.2.1/dist/ionicons/ionicons.js"></script>
+```
+Both the ES-module (modern browsers) and the legacy UMD (non-module browsers) variants are loaded, ensuring `<ion-icon>` web components register and render in all environments the app targets. Because web components upgrade in place, icons that render before the script loads will backfill correctly with no layout shift.
+
+**iOS Smart App Banner wired up** (`frontend/index.html`)
+`<meta name="apple-itunes-app" content="app-id=6761888929, ...">` enables the iOS native app-install banner automatically on shared recipe pages. Users on Safari mobile who haven't installed the app see a native prompt without any JavaScript or A/B logic — a high-value conversion touch-point with zero maintenance cost.
 ## ASSET:bug 2026-06-24 09:32 → Defensive patterns in place reduce crash surface across fetch and rendering paths
 
 `og-worker/src/index.js` wraps both the recipe API fetch and the Twemoji fetch in independent `try/catch` blocks with 3-second `AbortController` timeouts. Failures in either path fall back gracefully: the title defaults to `'A recipe from toifood'` and the emoji renders as an inline SVG `<text>` element rather than an embedded image. The worker always returns a valid PNG response regardless of upstream availability.
