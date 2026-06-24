@@ -10,6 +10,22 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:bug 2026-06-14 08:29 → `wrapTitle` in OG worker silently drops trailing words when a title fills both lines exactly
+## ISSUE:bug 2026-06-24 19:10 → og:image regex regressed from `[^>]*` to `[^]*`, destroying HTML from that tag to end-of-file
+
+`frontend/functions/recipe/[token].js` line:
+```js
+html = html.replace(/<meta property="og:image"[^]*/, `<meta property="og:image" content="${img}" /`);
+```
+
+In JavaScript, `[^]` inside a character class is a negated *empty* set — it matches **any character including newlines**, making `[^]*` equivalent to `[\s\S]*`. Because `.replace()` without the `g` flag is greedy, this pattern matches from the first `<meta property="og:image"` to the **end of the document string**. The replacement value ends with `/` (no `>`), so the produced HTML has:
+1. An unclosed `<meta property="og:image" content="..." /` with no closing `>`.
+2. Everything after the og:image tag — `</head>`, `<body>`, the Ionicons scripts, `</html>` — is gone.
+
+The subsequent `html.replace('</head>', ...)` silently no-ops (no `</head>` left to match), so the `og:image:width`, `og:image:height`, and `og:image:type` dimension tags are never appended. Crawlers receiving this response see a headless document fragment.
+
+The ASSET entry from 2026-06-15 documented this regex as `[^>]*` and proved its correctness. The current file has `[^]*` — either a copy-paste slip or an editor substitution that silently changed one character. The `[^>]*` form (stop before `>`) is the correct pattern: it consumes `content="/logo.png" /` but leaves the trailing `>` in place, which then closes the replacement tag.
+
+Separately: `AnnouncementNote.jsx` declares `const COLLAPSED_LINES = 2` at module scope but never references it. The component went straight to a modal pattern, leaving this constant as dead code that implies a planned collapse feature that was never implemented.
 ## ISSUE:bug 2026-06-24 09:32 → Nested profile fetch in SharedRecipe is not cancelled on unmount
 
 In `frontend/src/pages/SharedRecipe.jsx` the initial recipe fetch chains a second `fetch` for the author profile (line ~219–224) inside a `.then()` callback. Unlike the outer fetch, this inner call has no `AbortController` and is not cancelled when the component unmounts. If a user navigates away before the profile resolves, React receives a `setFullProfile` call on an unmounted component and logs a warning; in edge cases where the token changes via client-side navigation the stale profile could flash into view for the new recipe.
