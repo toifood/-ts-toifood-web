@@ -10,6 +10,18 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:test 2026-06-14 08:29 → Utility functions and hooks are structured for easy unit testing
+## ASSET:test 2026-06-27 10:55 → Test coverage state for ts-toifood-web
+
+Both packages (`frontend/`, `og-worker/`) have zero test files and no test runner configured. Current coverage is 0%.
+
+**Priority additions**
+- `og-worker/src/index.js`: unit tests for `wrapTitle` (overflow truncation, single-word title, exact two-line fit), `emojiCodepoint` (multi-codepoint emoji, ZWJ sequences, regional flag pairs, variation selector stripping), `escapeXml` (ampersand, double-quote, angle brackets)
+- `frontend/src/utils/announcementNote.js`: unit tests for `resolveDietaryAllergyNote` and `resolveDietaryInfoNote` with full `DIETARY_INFO` map coverage including edge cases (tag present with no `criticalAllergen` field, tag with no `dietaryGuideline` field, empty tag array)
+- `frontend/src/hooks/useReveal.js`: hook test with mocked `IntersectionObserver`, plus guard test for environments where the API is absent
+
+**Recommended tooling**
+- `og-worker/`: Vitest in Node mode (no DOM needed for pure utility functions; wasm can be mocked)
+- `frontend/`: Vitest + @testing-library/react
 ## ASSET:test 2026-06-24 19:10 → FAQ and AnnouncementNote are fully testable without network or timers
 
 **`FAQ.jsx` is synchronous and router-mockable**
