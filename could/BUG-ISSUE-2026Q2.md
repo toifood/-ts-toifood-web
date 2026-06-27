@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:bug 2026-06-14 08:29 → `wrapTitle` in OG worker silently drops trailing words when a title fills both lines exactly
+## ISSUE:bug 2026-06-28 06:36 → Timer display reverts to original cook time when paused + og-worker API URL hardcoded to production
+
+**Finding — `frontend/src/pages/SharedRecipe.jsx` (~line 581)**
+The desktop timer card renders `timerActive ? formatTime(timeLeft) : (recipe.cookTime >= 60 ? ... : `${recipe.cookTime} min`)`. When `timerActive` is false — including when the user has paused mid-countdown — the display always shows the original `recipe.cookTime`, not the remaining `timeLeft`. A user who starts a 30-minute timer and pauses it with 8 minutes remaining sees the display snap back to "30 min". The `timeLeft` state is correctly decremented in the background, so the timer resumes from the right point, but the paused UI gives no indication of time remaining. Every prior timer log addressed the "cannot restart after zero" issue; this display regression at any pause point is distinct and unlogged.
+
+**Finding — `og-worker/src/index.js` and `frontend/functions/recipe/[token].js`**
+Both files hardcode `https://api.toifood.co.nz` as the recipe API base with no environment variable or `wrangler.toml` binding. Cloudflare Workers support `env` vars and `wrangler.toml` environments (production/staging), but neither the og-worker nor the Pages function uses them. Any change to OG image generation or meta-tag injection must be validated against production — there is no way to point either worker at a staging API without a code change. Combined with no automated tests (see TEST-ISSUE), OG regressions can only be caught by manually inspecting live social previews after deployment.
 ## ISSUE:bug 2026-06-27 10:55 → Timer cannot restart after countdown + og-worker silently truncates long recipe titles
 
 **Finding — `frontend/src/pages/SharedRecipe.jsx`**
