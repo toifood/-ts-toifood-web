@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:bug 2026-06-14 08:29 → Pages Function OG meta regex correctly exploits tag structure to avoid double-closing
+## ASSET:bug 2026-06-28 06:36 → announcementNote.js now fully implemented; og:image regex correctly uses [^>]*
+
+**`frontend/src/utils/announcementNote.js` — critical crash resolved**
+The June 15 ISSUE entry logged that `announcementNote.js` was empty, causing `useAnnouncementNoteManager` to throw `TypeError` on any recipe with announcement note fields. The file now exports all three required functions — `resolveNote`, `resolveDietaryAllergyNote`, and `resolveDietaryInfoNote` — with correct signatures matching the hook's import. `resolveDietaryAllergyNote` properly maps dietary tags to `criticalAllergen` values and builds a safety-critical allergy warning string. `resolveDietaryInfoNote` similarly produces dietary guideline notes. Both functions guard against empty input and return `null` rather than a broken object, which is the correct contract for the `AnnouncementNote` component.
+
+**`frontend/functions/recipe/[token].js` — og:image regex is correct**
+The June 24 ISSUE entry logged a regression from `[^>]*` to `[^]*` in the og:image replace call, which would have consumed the rest of the HTML document. Current code reads `/<meta property="og:image"[^>]*/` — the `[^>]*` form, which correctly stops before the closing `>` and does not destroy the document. The `escapeHtml` function on title, description, and image URL continues to protect against XSS via malicious recipe content in all injected tag attributes.
 ## ASSET:bug 2026-06-27 10:55 → Bug audit of ts-toifood-web (frontend + og-worker)
 
 Three concrete bugs identified across the web layer.
