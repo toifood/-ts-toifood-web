@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:test 2026-06-14 08:29 → Zero tests across all packages; no testing framework installed
+## ISSUE:test 2026-06-28 06:36 → Zero test infrastructure; wrapTitle regression undetected for 6+ weeks due to no coverage
+
+**Finding — `frontend/package.json` and `og-worker/package.json`**
+Neither the frontend nor the og-worker has a test framework configured. `frontend/package.json` scripts are `dev`, `build`, and `preview` only — no `test` entry, no vitest, no jest, no testing-library. `og-worker/package.json` lists only `@resvg/resvg-wasm` as a dependency. `frontend/vite.config.js` has no test configuration block. There are no `*.spec.*` or `*.test.*` files anywhere in the repository. The codebase has zero automated test coverage.
+
+**Finding — `og-worker/src/index.js` `wrapTitle` as a case study**
+The `wrapTitle` word-drop bug has been logged in five separate BUG-ISSUE entries across this quarter (June 14, 20, 23, 24, 27) and remains unfixed. It is a pure function with deterministic input/output — a four-line unit test would have caught the regression on the first commit that introduced it and prevented five subsequent re-discoveries. The same applies to `resolveNote`, `resolveDietaryAllergyNote`, and `resolveDietaryInfoNote` in `announcementNote.js`: all pure functions with safety-critical output (allergen warnings) and no test coverage. The `onRequest` Pages function in `frontend/functions/recipe/[token].js` is also a pure HTML-string transform that could be unit-tested against a mock `env.ASSETS` without any Cloudflare runtime.
 ## ISSUE:test 2026-06-27 10:55 → Zero test coverage — og-worker SVG logic and dietary note resolution fully unverified
 
 **Finding — No test infrastructure**
