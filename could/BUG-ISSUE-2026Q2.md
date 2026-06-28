@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:bug 2026-06-14 08:29 → `wrapTitle` in OG worker silently drops trailing words when a title fills both lines exactly
+## ISSUE:bug 2026-06-29 06:25 → og-worker fires wasted 404 CDN fetch for emoji-less recipes; EST. cook time display ignores hours conversion
+
+**Finding — `og-worker/src/index.js` (empty emoji guard missing)**
+When `recipe.emoji` is absent or empty, `emoji` is set to `''`. `emojiCodepoint('')` spreads the empty string to an empty array, maps nothing, and returns `''`. The Twemoji URL becomes `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/.png` — a guaranteed 404. The worker still fires this fetch unconditionally before the AbortController timeout (3 s). `imgRes.ok` is false so `emojiImgTag` stays `''` and the SVG falls back to an empty `<text>` element. Net result: every OG image render for a recipe with no emoji wastes up to 3 seconds on a doomed CDN request. Fix: add `if (!emoji)` guard before the Twemoji fetch block.
+
+**Finding — `frontend/src/pages/SharedRecipe.jsx` (line 402–403)**
+The EST. cook time label renders `{recipe.cookTime} MIN` unconditionally. A 90-minute recipe shows "90 MIN"; a 120-minute recipe shows "120 MIN". The desktop timer card (line 582) correctly applies hours-and-minutes formatting for `recipe.cookTime >= 60` — `${Math.floor(recipe.cookTime / 60)} hr ${recipe.cookTime % 60} min` — but the EST. display does not use the same logic. A user cooking a 90-minute recipe sees "90 MIN" at the top of the page and "1 hr 30 min" on the timer in the same session.
 ## ISSUE:bug 2026-06-28 06:36 → Timer display reverts to original cook time when paused + og-worker API URL hardcoded to production
 
 **Finding — `frontend/src/pages/SharedRecipe.jsx` (~line 581)**
