@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:test 2026-06-14 08:29 → Zero tests across all packages; no testing framework installed
+## ISSUE:test 2026-06-29 06:25 → AnnouncementNote crashes on unknown type with no guard; FAQ accordion hard clip undetectable without visual tests
+
+**Finding — `frontend/src/components/AnnouncementNote.jsx`**
+`const ts = TYPE_STYLES[config.type ?? 'note']` returns `undefined` for any `type` value not in the `TYPE_STYLES` map (e.g. `'critical'`, `'alert'`, or a future `NoteType` addition). The component immediately dereferences `ts.iconBg`, `ts.icon`, `ts.iconColor`, and `ts.label` — all four throw `TypeError: Cannot read properties of undefined` if `ts` is `undefined`. `useAnnouncementNoteManager` currently only emits types from the `NoteType` enum plus the hardcoded string `'tip'`, so this path is unreachable in production today. However, `COLLAPSED_LINES = 2` is defined at the top of `AnnouncementNote.jsx` and never used, indicating prior refactoring; a developer adding a new note type to the hook without a matching `TYPE_STYLES` entry would silently crash every recipe page rendering that note. No test guards this type-map invariant.
+
+**Finding — `frontend/src/pages/FAQ.jsx` (line 1039)**
+`maxHeight: open ? 300 : 0` hard-codes the expanded accordion height at 300 px. Several answers — notably "How do I set or change my dietary preferences?" which lists five steps — may exceed 300 px on viewports narrower than 420 px. Content beyond 300 px is clipped with no scroll, ellipsis, or visual indicator that text was cut. No snapshot or visual regression test exists to catch when existing FAQ copy grows past the clip boundary, or when a newly added long answer is silently truncated.
 ## ISSUE:test 2026-06-28 06:36 → Zero test infrastructure; wrapTitle regression undetected for 6+ weeks due to no coverage
 
 **Finding — `frontend/package.json` and `og-worker/package.json`**
