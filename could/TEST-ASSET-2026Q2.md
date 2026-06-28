@@ -10,6 +10,10 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:test 2026-06-14 08:29 → Utility functions and hooks are structured for easy unit testing
+## ASSET:test 2026-06-29 06:25 → useAnnouncementNoteManager is fully synchronous and covers all six note branches in a single renderHook call
+
+**`frontend/src/hooks/useAnnouncementNoteManager.js`**
+All six returned fields (`descriptionNote`, `ingredientNote`, `methodNote`, `longRecipeNote`, `dietaryAllergyNote`, `dietaryInfoNote`) are computed synchronously from plain JS values — no async, no context, no DOM, no side effects. A single `renderHook(() => useAnnouncementNoteManager(recipe, DIETARY_INFO))` with Vitest + @testing-library/react produces all six fields simultaneously. A well-chosen fixture — `steps: Array(9)` for the `longRecipeNote` threshold, `dietaryTags: ['GlutenFree', 'NutFree']` for both allergen note types, `descriptionNote: 'text'` vs `''` for the null path — covers every branch in one test suite with no mocks required. The precise `useMemo` dep list (`recipe.descriptionNote`, `recipe.ingredientNote`, `recipe.methodNote`, `recipe.steps?.length`, `recipe.dietaryTags`, `dietaryInfo`) can be verified by updating each dep individually in `act()` and asserting only the relevant note field changes — confirming no stale closure and no unnecessary recomputation.
 ## ASSET:test 2026-06-28 06:36 → All critical paths are pure functions — ideal unit-test surface with no mocking complexity
 
 **`frontend/src/utils/announcementNote.js`**
