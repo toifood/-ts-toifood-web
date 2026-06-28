@@ -10,4 +10,10 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
-####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->## ISSUE:TC 2026-06-28 13:12 ▸ Terms incomplete: no pricing detail, no governing law, no age gate, stale date
+
+Terms.jsx (Last updated: April 2026) has four material gaps:
+1. **Pricing opacity** — Premium section says "Contact us for details" with no rates disclosed; FAQ contradicts by listing specific hourly limits. Rates must appear in T&Cs.
+2. **No governing law clause** — No NZ jurisdiction or dispute-resolution statement present.
+3. **No age requirement** — Privacy says 13+ but Terms is silent; Apple/Google require explicit age gates in published T&Cs.
+4. **Passive acceptance only** — "Continued use constitutes acceptance" with no affirmative consent flow or in-app update notification. Unenforceable for material changes under NZ Consumer Guarantees Act 1993.
