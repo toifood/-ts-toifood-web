@@ -10,6 +10,13 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:bug 2026-07-04 07:20 → Crash-prone null guard in AnnouncementNote, dead-end nav CTA, unrestartable timer, and OG meta inconsistencies
+## ISSUE:bug 2026-07-05 06:59 → Stale document.title/meta tags survive SPA navigation away from a shared recipe, and the cooking timer rebuilds its interval every second
+
+**Meta tags/title leak across client-side route changes — `frontend/src/pages/SharedRecipe.jsx`**
+The `useEffect` that fetches the recipe sets `document.title = title` and mutates `og:title`/`og:description`/`twitter:title`/`twitter:description` directly via `updateMeta(...)` on `document.querySelector`, with no cleanup to restore the defaults. `ScrollToTop.jsx` only resets `window.scrollTo`, not the head. Navigating client-side from `/recipe/:token` to `/`, `/faq`, `/privacy`, or `/terms` (via the `Link`s in `Navbar`/`Footer`, which don't force a full reload) leaves the previous recipe's title and Open Graph description showing in the browser tab and in any client-triggered share until the next full page load.
+
+**Cooking timer interval recreated on every tick — `frontend/src/pages/SharedRecipe.jsx`**
+The timer effect is declared `useEffect(..., [timerActive, timeLeft])`. Since `timeLeft` changes every second, React tears down (`clearInterval`) and rebuilds a fresh `setInterval(..., 1000)` on every single tick instead of starting one interval that keeps running. The countdown still works, but each tick's real-world delay is `1000ms + effect teardown/setup overhead`, so timers for longer cook times (the UI explicitly formats `h > 0` hour-scale durations) will drift more than a stable-dependency interval would.
 
 **Guard ordering crash — `frontend/src/components/AnnouncementNote.jsx`**
 `const ts = TYPE_STYLES[config.type ?? 'note']` executes before the `if (!config || !config.text) return null;` guard. If `config` is ever `null`/`undefined`, `config.type` throws a TypeError before the guard can bail out. Additionally, an unrecognized `config.type` (e.g. a new type added server-side) makes `ts` `undefined`, so `ts.icon` throws on render. Move the guard above the lookup and fall back to `TYPE_STYLES.note` for unknown types.
