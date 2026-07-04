@@ -10,6 +10,16 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:test 2026-07-04 07:20 → Codebase structure is already test-friendly: pure logic is separated from rendering and the Vite stack maps directly onto Vitest
+## ASSET:test 2026-07-05 06:59 → Static/pure data structures in FAQ and the note-manager hook make them cheap to lock down with tests, and the privacy/terms pages carry no test risk at all
+
+**`FAQ.jsx`'s FAQ data is a flat, pure array — ideal for a table-driven test**
+`FAQS` plus the `CATEGORIES`/`CAT_IDS` maps in `frontend/src/pages/FAQ.jsx` are static data with no side effects. A single test asserting every `FAQS` entry's `cat` exists in `CATEGORIES`, and every `CATEGORIES` entry has a `CAT_IDS` mapping, would catch a typo'd category — which currently just silently drops that FAQ item from the rendered list with no error — for near-zero authoring cost.
+
+**`useAnnouncementNoteManager`'s explicit dependency list is a natural `renderHook` target**
+`frontend/src/hooks/useAnnouncementNoteManager.js` lists every field it actually reads (`recipe.descriptionNote`, `.ingredientNote`, `.methodNote`, `recipe.steps?.length`, `recipe.dietaryTags`, `dietaryInfo`) rather than depending on `recipe` wholesale. That makes memoization directly testable — assert the returned object reference stays stable across re-renders when none of those fields change — which is cheaper and more precise than mounting the entire `SharedRecipe` page to verify the same behavior.
+
+**`Privacy.jsx`/`Terms.jsx` are pure presentational leaves with zero branching logic**
+Both pages are static JSX with no props, state, or conditionals, so they carry essentially no test risk on their own. Test-writing effort in this codebase is better concentrated entirely on the stateful/data-driven pieces (`SharedRecipe`, `useAnnouncementNoteManager`, the two Cloudflare functions) than spread thin across every page.
 
 **Logic already extracted from components**
 The note-resolution rules live in `frontend/src/utils/announcementNote.js` as pure functions, and `useAnnouncementNoteManager.js` is a thin memoized wrapper over them — meaning the business rules (allergen warnings, dietary guidelines, long-recipe tips) can be unit-tested without rendering a single component. The og-worker's SVG composition is likewise driven by small pure helpers rather than inline logic.
