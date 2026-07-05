@@ -10,6 +10,22 @@ REQUIRED FORMAT FOR EACH ISSUE ENTRY:
 ## ISSUE:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ISSUE ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ISSUE ENTRIES-->## ISSUE:bug 2026-07-04 07:20 → Crash-prone null guard in AnnouncementNote, dead-end nav CTA, unrestartable timer, and OG meta inconsistencies
+## ISSUE:bug 2026-07-06 07:05 → Meta-tag rewrite mismatch breaks client updates, AnnouncementNote crashes on null config, Navbar Download dead off-home, timer drifts
+
+**Finding — `frontend/functions/recipe/[token].js` ↔ `frontend/src/pages/SharedRecipe.jsx` (twitter meta selector mismatch)**
+The Pages function rewrites `<meta property="twitter:*">` tags into `name="twitter:*"` form (lines replacing `property="twitter:title"` with `name="twitter:title"`), but `SharedRecipe.jsx` then calls `updateMeta('meta[property="twitter:title"]', …)` and `updateMeta('meta[property="twitter:description"]', …)`. After the edge rewrite those tags no longer carry a `property` attribute, so the client-side selector matches nothing and the twitter title/description silently keep the edge-injected values (or the stale index.html values when the edge fetch failed). Two layers each half-own the meta tags with incompatible attribute conventions.
+
+**Finding 2 — `frontend/src/components/AnnouncementNote.jsx` (guard ordered after dereference)**
+`const ts = TYPE_STYLES[config.type ?? 'note'];` executes before the `if (!config || !config.text) return null;` guard. If `config` is ever `null`/`undefined`, the component throws `TypeError: Cannot read properties of null (reading 'type')` instead of rendering nothing — the null guard is unreachable for exactly the case it protects against. Additionally, an unrecognised `config.type` (e.g. `'caution'`) makes `ts` undefined and `ts.icon` throws. Callers currently pre-filter with `notes.x && …`, so this is latent, but the component's own contract is broken.
+
+**Finding 3 — `frontend/src/components/Navbar.jsx` (Download button dead on non-home routes)**
+The nav CTA is `<a href="#download">`. On `/faq`, `/privacy`, `/terms`, and `/recipe/:token` no element with id `download` exists, so the primary conversion button does nothing on every page except Home. The recipe-sidebar CTAs correctly use `/#download`; the Navbar should too.
+
+**Finding 4 — `frontend/src/pages/SharedRecipe.jsx` (timer interval recreated every tick)**
+The countdown effect depends on `[timerActive, timeLeft]`, so each 1-second tick tears down and recreates the `setInterval`. Each cycle restarts the 1000 ms clock after React commits, so the timer accumulates drift (real elapsed time > displayed countdown) — noticeable over a 45–60 min cook time. Depending only on `timerActive` and decrementing via the functional updater (stopping inside the callback when reaching 0) removes the drift.
+
+**Finding 5 — `og-worker/src/index.js` (`wrapTitle` never breaks a long single word; silent truncation)**
+`wrapTitle` only wraps at spaces: a single token longer than 26 chars is pushed as one line and overflows the 1200px canvas at font-size 56. Titles needing more than two lines are truncated with no ellipsis (`if (lines.length === 2) { current = ''; break; }`), so the OG card can end mid-phrase. Also, when `emoji` is empty the Twemoji fetch requests `…/72x72/.png` (guaranteed 404) and the SVG `<text>` fallback renders nothing because resvg has no colour-emoji font — the image ships with a blank hero area.
 ## ISSUE:bug 2026-07-05 06:59 → Stale document.title/meta tags survive SPA navigation away from a shared recipe, and the cooking timer rebuilds its interval every second
 
 **Meta tags/title leak across client-side route changes — `frontend/src/pages/SharedRecipe.jsx`**
