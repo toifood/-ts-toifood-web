@@ -10,6 +10,15 @@ REQUIRED FORMAT FOR EACH ASSET ENTRY:
 ## ASSET:{NAME OF ENVIRONMENT} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD ALL NEW ASSET ENTRIES DIRECTLY BELOW THIS LINE, NEVER DELETE OR EDIT PREVIOUS ASSET ENTRIES-->## ASSET:test 2026-07-04 07:20 → Codebase structure is already test-friendly: pure logic is separated from rendering and the Vite stack maps directly onto Vitest
+## ASSET:test 2026-07-06 07:05 → Codebase is unusually test-ready: pure helpers, injected config maps, and two small workers with single entry points
+
+**Pure, exported logic ready for unit tests.** `frontend/src/utils/announcementNote.js` exports three pure functions plus a `NoteType` enum with zero imports — a unit test file needs no mocking at all. The og-worker's `wrapTitle`, `emojiCodepoint`, `escapeXml`, and `bufToBase64` are similarly side-effect-free (only `bufToBase64` touches `btoa`, available in Node ≥16 and workerd alike).
+
+**Single, narrow entry points.** Each deployable has exactly one handler: `onRequest(context)` in the Pages function and `fetch(request)` in the og-worker. Both take injectable inputs (`env.ASSETS`, `Request`) rather than reaching for globals, so integration tests can pass a stub `env` and fixture requests without infrastructure. The og-worker returns a plain `Response` whose headers and content-type are directly assertable.
+
+**Data-driven rendering.** `SharedRecipe.jsx` derives nearly all output from three lookup tables (`CONTINENT_INFO`, `DIETARY_INFO`, `MEALTYPE_INFO`) and a single API payload shape, so component tests reduce to "given this recipe JSON, these rows render" — one MSW/fetch stub covers the whole page. `useAnnouncementNoteManager` takes `(recipe, dietaryInfo)` as plain arguments, making the note-selection matrix (allergen vs guideline vs long-recipe) testable via `renderHook` with table-driven cases.
+
+**Modern toolchain slot-in.** The stack is Vite 5 + React 18, so `vitest` shares the existing `vite.config.js` (one `test` block, no separate babel/jest config), and `@cloudflare/vitest-pool-workers` runs the og-worker inside real workerd semantics. The gap this quarter is purely the absence of tests, not any structural obstacle to writing them.
 ## ASSET:test 2026-07-05 06:59 → Static/pure data structures in FAQ and the note-manager hook make them cheap to lock down with tests, and the privacy/terms pages carry no test risk at all
 
 **`FAQ.jsx`'s FAQ data is a flat, pure array — ideal for a table-driven test**
