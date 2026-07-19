@@ -11,6 +11,19 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-07-20 07:17 ▸ First commits in 2+ months (6ef06d7, b4bfc2e, 2026-07-17) confirm the redirect-cache-trap risk in practice and add a 4th hardcoded API-URL location; the flagged "prior to recipe refacter" work still hasn't landed
+
+`main` moved for the first time since the 2026-07-13 re-audit (HEAD was `4bbf230`, "prior to recipe refacter," static since 2026-05-14). Two new commits landed 2026-07-17, but neither is the refactor that commit message implied was pending — that work remains unstarted, now stalled 2+ months longer.
+
+New/updated findings from these commits:
+
+1. **Redirect-cache-trap risk (item 1, carried since 2026Q2) is now confirmed by a real failure, not just theory.** Commit `b4bfc2e`'s own message states the `/sitemap.xml` rule in `frontend/public/_redirects` was "silently invalid" — `_redirects` only supports cross-origin proxying via a real redirect status (301/302); a 200 rewrite works only for same-Pages-project paths, so the rule fell through to the SPA catch-all undetected. That rule has been replaced with a Pages Function (`frontend/functions/sitemap.xml.js`, fetch + re-serve, same pattern as `functions/recipe/[token].js`). The other **ten** API proxy prefixes in `_redirects` (`/auth/*`, `/recipes/*`, `/pantry/*`, `/user/*`, `/users/*`, `/lists/*`, `/flows/*`, `/stats`, `/health`, `/app-config`) still use raw 301s and carry the identical cache-permanence risk — now with a concrete precedent that this exact pattern breaks silently.
+
+2. **Hardcoded API base URL grew from 3 locations to 4.** `frontend/functions/sitemap.xml.js` adds a new hardcoded `https://api.toifood.co.nz/sitemap.xml`, alongside the existing hardcodes in `frontend/src/pages/SharedRecipe.jsx`, `frontend/functions/recipe/[token].js`, and `og-worker/src/index.js`. A domain migration now touches five files total (four code locations plus `_redirects`).
+
+3. **Fragile regex/string-replace head-rewriting (item 5, carried) gained more surface area, same bug class.** `frontend/functions/recipe/[token].js` added `recipeJsonLd()` (schema.org `Recipe` script tag) and `fallbackContentHtml()` (noscript ingredient/step list), both injected via `.replace('</head>', ...)` and `.replace('<div id="root">', ...)` string substitutions with no test coverage. The pre-existing truncated `og:image` regex (`[^>]*` without closing `>`) is untouched and still coupled to `index.html`'s exact formatting.
+
+Unchanged and still open: triple independent fetch of `GET /recipes/public/{token}` (item 4), og-worker's per-request dependency on `cdnjs.cloudflare.com` Twemoji with a tofu-glyph fallback (item 6), and the total absence of README/CI/tests (item 7) — no `.github/workflows`, no test files, still zero documentation of the two-service deploy relationship outside this log.
 ## ISSUE:ARCHITECTURE 2026-07-13 07:17 ▸ All seven open risks re-verified unchanged on `main` — no commits since 2026-05-14, no remediation started
 
 Re-audit of `main` (HEAD `4bbf230`, "prior to recipe refacter", 2026-05-14): zero commits since the 2026-07-06 entry below, and each risk was re-confirmed directly against current file contents rather than assumed:
