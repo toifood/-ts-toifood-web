@@ -11,6 +11,25 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ARCHITECTURE 2026-07-20 07:17 ▸ Recipe OG function gains schema.org JSON-LD + crawlable noscript fallback; sitemap.xml migrated from a broken `_redirects` 301 to a working Pages Function proxy
+
+Two commits landed 2026-07-17 (`6ef06d7`, `b4bfc2e`) on top of the unchanged two-service Cloudflare baseline (see 2026-07-13 entry below — still current for the rest of the architecture):
+
+1. **`frontend/functions/recipe/[token].js` now emits structured data for crawlers**, reusing the same recipe fetch it already performs (no new fetch call added, so the "triple-fetch" count in the ISSUE log is unchanged):
+   - `recipeJsonLd()` builds a `schema.org` `Recipe` object (name, description, image, datePublished, recipeYield, `totalTime` when `cookTime` is set, recipeIngredient, recipeInstructions as `HowToStep`s, recipeCuisine when `continent` is set, keywords from dietaryTags) and injects it as a `<script type="application/ld+json">` tag before `</head>`.
+   - The JSON-LD payload is escaped (`<` → `\u003c`) before injection specifically so a recipe title/ingredient containing `</script>` can't break out of the script tag — `JSON.stringify` alone doesn't escape `/`.
+   - `fallbackContentHtml()` renders an escaped `<noscript>` block (title, description, ingredient `<ul>`, step `<ol>`) inserted immediately inside `<div id="root">`, so non-JS crawlers see real content while JS-enabled users never see it once React hydrates over it.
+
+2. **`frontend/public/robots.txt` added**: `Allow: /` for all agents, points `Sitemap:` at `https://app.toifood.co.nz/sitemap.xml`.
+
+3. **`frontend/functions/sitemap.xml.js` added**, replacing the prior `_redirects`-based `/sitemap.xml` rule (removed from `_redirects` in the same change). The old rule silently never worked — `_redirects` can't proxy cross-origin via a 200 rewrite, only via a real redirect, and a real redirect would move the canonical sitemap URL off `app.toifood.co.nz`. The new function fetches `https://api.toifood.co.nz/sitemap.xml` (edge-cached 3600s) and re-serves the body/status directly, matching the fetch-and-re-serve pattern already used by `functions/recipe/[token].js`.
+
+4. **Recovery posture unchanged**: still no database, Prisma, or server state in this repo; full recovery remains two independent redeploys (Pages `vite build` → `dist`, and `wrangler deploy` for `toifood-og`). DNS/domain bindings remain the only externally-held state.
+
+---
+## ASSET:ARCHITECTURE 2026-07-13 07:17 ▸ Baseline re-verified at `main` HEAD `4bbf230` (2026-05-14) — two-service stateless Cloudflare architecture unchanged, entry below remains the authoritative description
+
+Re-verified against live file contents on `main`: no commits since 2026-05-14, and spot-checks of `frontend/wrangler.toml` (Pages, `pages_build_output_dir = "dist"`), `og-worker/wrangler.toml` (Worker, `main = "src/index.js"`), `frontend/functions/recipe/[token].js`, `og-worker/src/index.js`, `frontend/src/App.jsx` (routes `/`, `/privacy`, `/terms`, `/faq`, `/recipe/:token`), `frontend/public/_redirects`, and both `package.json` files all match the 2026-07-06 ASSET entry exactly. The full architecture description, service chain, and redeploy-only recovery posture in that entry stand without amendment; consult it as current.
 ## ASSET:ARCHITECTURE 2026-07-13 07:17 ▸ Baseline re-verified at `main` HEAD `4bbf230` (2026-05-14) — two-service stateless Cloudflare architecture unchanged, entry below remains the authoritative description
 
 Re-verified against live file contents on `main`: no commits since 2026-05-14, and spot-checks of `frontend/wrangler.toml` (Pages, `pages_build_output_dir = "dist"`), `og-worker/wrangler.toml` (Worker, `main = "src/index.js"`), `frontend/functions/recipe/[token].js`, `og-worker/src/index.js`, `frontend/src/App.jsx` (routes `/`, `/privacy`, `/terms`, `/faq`, `/recipe/:token`), `frontend/public/_redirects`, and both `package.json` files all match the 2026-07-06 ASSET entry exactly. The full architecture description, service chain, and redeploy-only recovery posture in that entry stand without amendment; consult it as current.
