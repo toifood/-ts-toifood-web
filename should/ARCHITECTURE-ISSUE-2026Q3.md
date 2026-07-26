@@ -11,6 +11,16 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-07-27 07:24 ▸ No commits since `b4bfc2e` (2026-07-17) — all seven open risks re-verified unchanged, no remediation started
+
+Re-audit of `main` (HEAD still `b4bfc2e`, "fix: sitemap.xml via Pages Function instead of `_redirects` proxy"): zero commits in the 10 days since the 2026-07-20 entry below. Every finding from that entry was re-checked directly against current file contents, not assumed current:
+
+- **Redirect-cache-trap risk (item 1)** — unchanged. `frontend/public/_redirects` still issues raw **301**s on all ten remaining API proxy prefixes (`/auth/*`, `/recipes/*`, `/pantry/*`, `/user/*`, `/users/*`, `/lists/*`, `/flows/*`, `/stats`, `/health`, `/app-config`); only `/sitemap.xml` was ever migrated off this pattern.
+- **Hardcoded API base URL (item 2)** — still 4 locations: `frontend/src/pages/SharedRecipe.jsx`, `frontend/functions/recipe/[token].js`, `frontend/functions/sitemap.xml.js`, `og-worker/src/index.js` (verified byte-for-byte against 2026-07-20 fetch).
+- **Fragile regex/string-replace head-rewriting (item 3)** — unchanged. `frontend/functions/recipe/[token].js` still uses `.replace('</head>', ...)` / `.replace('<div id="root">', ...)` string substitution for JSON-LD and noscript fallback injection, still no test coverage, still coupled to `index.html`'s exact markup.
+- **Triple-fetch of `GET /recipes/public/{token}`** (item 4), **og-worker's per-request `cdnjs.cloudflare.com` Twemoji dependency with tofu-glyph fallback** (item 5), and **total absence of README/CI/tests** (item 6) — all confirmed still present, no `.github/workflows` directory exists in the tree, no test files anywhere.
+
+The "prior to recipe refacter" work flagged as pending since the 2026-05-14 commit (`4bbf230`) remains unstarted — now stalled roughly 2.5 months with no further signal it's in progress.
 ## ISSUE:ARCHITECTURE 2026-07-20 07:17 ▸ First commits in 2+ months (6ef06d7, b4bfc2e, 2026-07-17) confirm the redirect-cache-trap risk in practice and add a 4th hardcoded API-URL location; the flagged "prior to recipe refacter" work still hasn't landed
 
 `main` moved for the first time since the 2026-07-13 re-audit (HEAD was `4bbf230`, "prior to recipe refacter," static since 2026-05-14). Two new commits landed 2026-07-17, but neither is the refactor that commit message implied was pending — that work remains unstarted, now stalled 2+ months longer.
