@@ -11,6 +11,9 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ARCHITECTURE 2026-07-27 07:24 ▸ Baseline re-verified at unchanged `main` HEAD `b4bfc2e` (2026-07-17) — two-service stateless Cloudflare architecture stands as described in the 2026-07-20 entry below
+
+Re-verified against live file contents on `main`: no commits since `b4bfc2e` (2026-07-17), so the 2026-07-20 ASSET entry — JSON-LD/noscript injection in `frontend/functions/recipe/[token].js`, `frontend/public/robots.txt`, the `frontend/functions/sitemap.xml.js` Pages Function replacing the broken `_redirects` sitemap rule, and the unchanged redeploy-only recovery posture (Pages `vite build` → `dist`; `wrangler deploy` for `toifood-og`; no database/Prisma/server state in this repo) — remains the authoritative current-state description without amendment.
 ## ASSET:ARCHITECTURE 2026-07-20 07:17 ▸ Recipe OG function gains schema.org JSON-LD + crawlable noscript fallback; sitemap.xml migrated from a broken `_redirects` 301 to a working Pages Function proxy
 
 Two commits landed 2026-07-17 (`6ef06d7`, `b4bfc2e`) on top of the unchanged two-service Cloudflare baseline (see 2026-07-13 entry below — still current for the rest of the architecture):
