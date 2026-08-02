@@ -11,6 +11,20 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-08-03 07:25 ▸ Committed `frontend/dist/` build output caused a real production routing bug (stale `privacy.html` shadowed the SPA); all six carried-forward Q2/Q3 risks remain fully unresolved
+
+New this quarter — first commits since the 2026-07-27 re-audit (`main` moved from `b4bfc2e` to `96f7e91`, six commits, 2026-08-01):
+
+8. **`frontend/dist/` (Vite build output) is committed to git, and it had drifted badly stale.** `frontend/public/privacy.html` — a 374-line standalone static duplicate of the `/privacy` route — sat alongside the SPA's `frontend/src/pages/Privacy.jsx`, and Cloudflare Pages resolves a matching static file *before* falling through to the `index.html` SPA catch-all. This meant `/privacy` served the stale static file directly, bypassing React Router entirely, invisible to anyone testing via `npm run dev`. The committed `frontend/dist/` copy was old enough to predate the 2026-07-17 `robots.txt`/`_headers` additions to `frontend/public/` (both files were entirely absent from the committed `dist/`), meaning the deployed build artifact had been out of sync with source for weeks with nothing to flag it. Fixed across two commits: `8b5a33c` removed `frontend/public/privacy.html`; `7622913` rebuilt and re-committed `dist/` (dropping `dist/privacy.html`, rotating the hashed bundle `index-eburNf4I.js`→`index-4UoVc9O3.js` and its CSS counterpart, and picking up the previously-missing `dist/_headers`/`dist/robots.txt`). The companion cache-control tightening (`aa3c19c`, `d1ab6cc` — see ASSET log) mitigates the *symptom* (a stale HTML shell staying cached at the edge) but not the root cause: a static file and a matching client route can still silently coexist, and nothing in this repo (no CI, no build-freshness check, no test) would catch a repeat.
+
+Carried forward, re-verified unchanged against current `main` (HEAD `96f7e91`, 2026-08-01) — none of these files were touched by this quarter's redesign or bugfix commits:
+
+1. **Redirect-cache-trap** — `frontend/public/_redirects` still issues raw 301s on all ten API proxy prefixes (`/auth/*`, `/recipes/*`, `/pantry/*`, `/user/*`, `/users/*`, `/lists/*`, `/flows/*`, `/stats`, `/health`, `/app-config`).
+2. **Hardcoded API base URL**, still 4 locations: `frontend/src/pages/SharedRecipe.jsx`, `frontend/functions/recipe/[token].js`, `frontend/functions/sitemap.xml.js`, `og-worker/src/index.js`.
+3. **Fragile regex/string-replace head-rewriting** in `frontend/functions/recipe/[token].js` — still untested, still coupled to `index.html`'s exact markup.
+4. **Triple-fetch of `GET /recipes/public/{token}`** across the Pages Function, the SPA, and the og-worker — unchanged.
+5. **og-worker's per-request `cdnjs.cloudflare.com` Twemoji dependency** with tofu-glyph fallback on outage — unchanged.
+6. **No README, CI, or tests anywhere in the repo.** This quarter is the clearest cost of that gap yet: a ~350-line visual redesign (6 files) and the `privacy.html` production regression both landed and reached Cloudflare Pages with zero automated check that could have caught either the routing shadow or a build/source mismatch before users hit it.
 ## ISSUE:ARCHITECTURE 2026-07-27 07:24 ▸ No commits since `b4bfc2e` (2026-07-17) — all seven open risks re-verified unchanged, no remediation started
 
 Re-audit of `main` (HEAD still `b4bfc2e`, "fix: sitemap.xml via Pages Function instead of `_redirects` proxy"): zero commits in the 10 days since the 2026-07-20 entry below. Every finding from that entry was re-checked directly against current file contents, not assumed current:
