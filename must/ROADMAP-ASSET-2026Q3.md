@@ -11,6 +11,17 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ROADMAP 2026-08-03 07:08 ▸ Shipped feature set unchanged since Q2; no new pillars added
+
+State confirmed identical to the 2026-06-28/29 baseline — no commits have added or removed a shipped pillar. Current confirmed-live surface:
+
+- **Core generation** — Basic (local model) vs Premium (Claude/Anthropic) recipe tiers, both advertised in `FAQ.jsx` and `Home.jsx`'s feature grid.
+- **Pantry/Grocery Match** — percentage-match features described in FAQ under "Pantry & Grocery" category, consistent with `SharedRecipe.jsx`'s ingredient-list rendering.
+- **Public share flow** — `SharedRecipe.jsx` fully renders ingredients, steps, cook-time, servings, dietary tags, continent cuisine, meal type, YouTube pairing (`recipe.videoId`), and an author card with PREMIUM/FREE badge, all live from `https://api.toifood.co.nz`.
+- **SEO/crawlability layer** — `frontend/functions/recipe/[token].js` injects per-recipe OG/Twitter meta tags, JSON-LD `Recipe` schema, and noscript fallback content into the SPA shell; `frontend/functions/sitemap.xml.js` proxies the backend sitemap.
+- **Distribution** — App Store (`id6761888929`) and Google Play (`com.toifood.app`) listings live and linked from both hero and footer CTAs.
+- **Legal docs** — `Terms.jsx` (last updated April 2026) and `Privacy.jsx` (last updated 11 May 2026) both shipped and routed at `/terms` and `/privacy`; neither has been revised this quarter.
+- **Stack** — React 18 + Vite + React Router v6 on Cloudflare Pages (`wrangler.toml`, `_redirects`, `_headers`); no dependency or version changes since Q2.
 ## ASSET:ROADMAP 2026-07-27 07:08 ▸ SEO/crawlability hardened this cycle: Recipe JSON-LD, noscript fallback content, and a proper sitemap function
 
 Two commits landed since the 2026-07-06 log (`6ef06d7b`, `b4bfc2e0`, both 2026-07-17), both additive with no regressions to previously logged assets:
