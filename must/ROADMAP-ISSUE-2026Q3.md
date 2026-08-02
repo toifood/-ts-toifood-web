@@ -11,6 +11,15 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ROADMAP 2026-08-03 07:08 ▸ Same three Q2 gaps persist unchanged: pulled-back social layer, dietary enum mismatch, og-worker unverifiable
+
+Re-checked against the 2026Q2 findings (2026-06-28/29) — all three remain, byte-for-byte unchanged in the current `main` tree:
+
+1. **Pulled-back social layer** — `frontend/src/pages/SharedRecipe.jsx` still contains two dead commented-out blocks: a mobile sticky cooking-timer bar (lines ~600-639, marked "REMOVED") and a full "Author Cooking Profile" section (lines ~896-934, marked "privacy-gated") that would have aggregated `fullProfile.continents`, `dietaryTags`, `mealTypes`, and `styles` per author. Both were built and pulled before ship; the live `authorCard` section at the bottom of the file only exposes `sharedRecipeCount`, `totalRecipeCount`, member-duration, and a PREMIUM/FREE badge (line 942-1008) — a materially smaller public surface than what was built and shelved. Dead code left in place two quarters running suggests either an unresolved privacy decision or abandoned cleanup.
+
+2. **Dietary enum mismatch, still unreconciled** — `DIETARY_INFO` in `SharedRecipe.jsx` (lines 385-399) exposes 13 tags (adds EggFree, SoyFree, Pescatarian, Kosher, Paleo, LowCarb on top of the base 7). `FAQ.jsx`'s `dietary-set` entry (line 9) and `Privacy.jsx` §3's "Preferences" list both still enumerate only 7 (Vegan, Vegetarian, Gluten-Free, Dairy-Free, Halal, Keto, NutFree), and FAQ still states a "maximum 3" filter cap. If the 6 extra tags are real backend-supported options, both public-facing docs are stale and understate what the Privacy Policy should be disclosing as collected preference data; if they're legacy stubs, `SharedRecipe.jsx` is carrying dead enum values.
+
+3. **og-worker deployment still unverifiable** — `og-worker/src/index.js` (Cloudflare Worker rendering OG-image PNGs via `@resvg/resvg-wasm`) has no inbound reference from any frontend page or Cloudflare Pages Function. `frontend/functions/recipe/[token].js` builds its own `ogImage` URL pointing at `https://api.toifood.co.nz/recipes/public/${token}/og-image` — a backend-served path, not the `toifood-og` worker. Nothing in this repo confirms `og-worker` is deployed, routed to, or superseded.
 ## ISSUE:ROADMAP 2026-07-27 07:08 ▸ Five issues persist unresolved since 2026-07-06; two new SEO commits landed with no new gaps found
 
 Reviewed against main @ b4bfc2e0 (2026-07-17), two commits ahead of the last log (4bbf2306-era state reviewed 2026-07-06). All six previously logged issues confirmed still present verbatim in current code:
