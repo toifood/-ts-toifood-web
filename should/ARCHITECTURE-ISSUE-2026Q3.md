@@ -11,6 +11,21 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-08-10 06:54 ▸ Recipe-sharing feature migrated out of this repo entirely, but leaves `og-worker` orphaned with a stale cross-reference, and the `/privacy` cache workaround has no cleanup plan
+
+Six commits landed 2026-08-02/03 on top of the 2026-08-03 entry's HEAD (`96f7e91` → `0abd9e9`):
+
+1. **`/recipe/:token` retired from this repo, not fixed.** `038171b`/`fb6f345`/`7381a93` (all 2026-08-02) removed the route from `App.jsx`, deleted `frontend/src/pages/SharedRecipe.jsx`, and deleted `frontend/functions/recipe/[token].js` — commit messages state recipe pages "now served by `ts-toifood-app`" / "retiring in favour of `app.toifood.co.nz`". This is a deliberate migration, not a regression, and it resolves most of items 2-4 from the carried-forward list below (the fragile regex head-rewriting is gone with the file; hardcoded API base URL drops from 4 locations to 2; the triple-fetch drops to a single og-worker fetch that nothing in this repo triggers anymore).
+
+2. **`og-worker/src/index.js` (`og.toifood.co.nz`) is now orphaned within this repo.** Nothing in `toifood-web` references it any more — the only thing that used to set `og:image` to it was the just-deleted Pages Function. `frontend/functions/sitemap.xml.js`'s comment ("same pattern as `functions/recipe/[token].js`") now points at a file that doesn't exist, which will mislead whoever next edits that function. Whether recipe link previews still work at all now depends on `ts-toifood-app` (a separate repo, not visible to this analysis) having built its own equivalent of the deleted Pages Function pointing at this same worker — that hand-off isn't referenced anywhere in this repo's commits or logs, so it can't be verified here and should be confirmed directly with whoever owns `ts-toifood-app`.
+
+3. **`/policy` route (`73974e1`) is an undocumented-lifetime workaround.** `App.jsx` now maps both `/privacy` and `/policy` to the same `<Privacy/>` component; the commit message says it exists because `/privacy` is "stuck" in edge cache (consistent with the `no-store` header rewrite and stale-`dist/` incident from the prior entry). No comment, issue, or log entry marks this for removal once the stale edge cache expires — left alone, `/policy` becomes permanent, silently duplicate content with no indication it was ever meant to be temporary.
+
+Carried forward, re-verified against current `main` (HEAD `0abd9e9`, 2026-08-03):
+
+4. **Redirect-cache-trap** — `frontend/public/_redirects` still issues raw 301s on all ten API proxy prefixes (`/auth/*`, `/recipes/*`, `/pantry/*`, `/user/*`, `/users/*`, `/lists/*`, `/flows/*`, `/stats`, `/health`, `/app-config`), unchanged.
+5. **Hardcoded API base URL** — now only 2 locations (`frontend/functions/sitemap.xml.js`, `og-worker/src/index.js`), down from 4 after the recipe-function removal, but still no env abstraction.
+6. **No TypeScript, no README, no CI, no tests anywhere in the repo** — unchanged; the only documentation of the two-service deploy relationship, and now of the cross-repo recipe hand-off, remains this log.
 ## ISSUE:ARCHITECTURE 2026-08-03 07:25 ▸ Committed `frontend/dist/` build output caused a real production routing bug (stale `privacy.html` shadowed the SPA); all six carried-forward Q2/Q3 risks remain fully unresolved
 
 New this quarter — first commits since the 2026-07-27 re-audit (`main` moved from `b4bfc2e` to `96f7e91`, six commits, 2026-08-01):
