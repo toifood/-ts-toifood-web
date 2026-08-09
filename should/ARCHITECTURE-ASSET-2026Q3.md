@@ -11,6 +11,15 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ARCHITECTURE 2026-08-10 06:54 ▸ Recipe viewer + its OG Pages Function removed from `toifood-web`; site is now marketing-only (Home/Privacy/Terms/FAQ/Contact) fronting a separately-hosted app
+
+Six commits (2026-08-02 to 2026-08-03) on top of the 2026-08-03 baseline (HEAD moved `96f7e91` → `0abd9e9`):
+
+1. **Recipe sharing removed from this repo's surface.** `App.jsx` routes are now `/`, `/privacy`, `/policy` (alias, see ISSUE log), `/terms`, `/faq`, `/contact` — no `/recipe/:token`. `frontend/src/pages/SharedRecipe.jsx` and `frontend/functions/recipe/[token].js` are both deleted. `toifood-web` is now a pure static marketing site; recipe viewing/sharing lives in `ts-toifood-app` at `app.toifood.co.nz`.
+2. **`og-worker` (`toifood-og`) is untouched and still deployed** (`og-worker/wrangler.toml`, `og-worker/src/index.js` — SVG→PNG via `@resvg/resvg-wasm`, Twemoji-via-cdnjs) but this repo no longer calls it anywhere; it's reachable only if `ts-toifood-app` or the backend (`ts-toifood-back`) points to it directly.
+3. **New `/contact` page** (`0abd9e9`): `frontend/src/pages/Contact.jsx`, a single `mailto:success@toifood.co.nz` CTA card reusing the existing `.recipe-container`/`.recipe-card-white` pattern and `useReveal` hook; linked from `Footer.jsx`.
+4. **`/policy` alias route added** (`73974e1`) as a same-component duplicate of `/privacy`, plus a content reorder in `Privacy.jsx` (`33b2cdb`, Delete Your Account section moved after Your Rights) — content change only, no new sections.
+5. **Recovery posture simplified further**: with the Pages Function gone, `toifood-web` recovery is now a single redeploy (`vite build` → `dist`, Cloudflare Pages) with zero server-side logic left in this repo; `toifood-og` remains a second, independent `wrangler deploy` target. No database, Prisma, or server state — unchanged from prior quarters.
 ## ASSET:ARCHITECTURE 2026-08-03 07:25 ▸ Full visual redesign (design tokens, new Navbar/Home/PhoneMockup/useReveal) plus a stale-build incident fixed by rebuilding `dist/` and switching HTML routes to `no-store` caching
 
 Six commits landed 2026-08-01 on top of the unchanged two-service Cloudflare baseline (see 2026-07-20 entry below — still current for OG/sitemap functions, redirects, and the og-worker):
