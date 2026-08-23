@@ -11,6 +11,21 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ROADMAP 2026-08-24 06:23 ▸ Share funnel removed 2026-08-02 — invalidates 2026-08-03 asset log; og-worker now confirmed orphaned; pricing/404 gaps persist
+
+Reviewed against main @ 626e2224 (2026-08-15). Significant repo change since the last log (2026-08-03 07:08): three commits on 2026-08-02 (038171b5, fb6f3454, 7381a93c) removed the entire `/recipe/:token` web share funnel — route in `App.jsx`, `SharedRecipe.jsx` page, and the `functions/recipe/[token].js` Pages Function (JSON-LD, noscript fallback, OG/Twitter meta injection) — with commit messages stating "recipe pages now served by ts-toifood-app". **The 2026-08-03 07:08 ROADMAP ASSET entry postdates these removals but still lists "Public share flow" and "SEO/crawlability layer" as live, confirmed-unchanged assets — that entry is now factually wrong and should be treated as stale**, not as the current baseline.
+
+Two previously-tracked issues are resolved as moot, not fixed — the file that carried them no longer exists:
+1. ~~Dietary enum mismatch~~ — `SharedRecipe.jsx`'s 13-tag `DIETARY_INFO` is deleted along with the page. `FAQ.jsx` and `Privacy.jsx` §2's 7-tag / "maximum 3" disclosure is now the only enum in this repo and is internally consistent.
+2. ~~Dead mobile timer code~~ — deleted along with `SharedRecipe.jsx`.
+
+One issue changed in nature, not resolved:
+3. **og-worker is now confirmed orphaned, not just "unverifiable"** — with `functions/recipe/[token].js` gone, nothing in the codebase (or in `frontend/index.html`'s static `og:image: /logo.png`) calls the `toifood-og` Cloudflare Worker. `og-worker/` (package.json, wrangler.toml, src/index.js, resvg-wasm dependency) ships in this repo with zero remaining callers. Either decommission the worker or document why it's retained. Note: `frontend/functions/sitemap.xml.js`'s header comment still reads "same pattern as functions/recipe/[token].js" — a dangling reference to a deleted file.
+
+Unchanged, still open:
+4. **Pricing disclosure gap** — `Terms.jsx` "Premium Features" section still reads "Contact us for details on available premium tiers and pricing"; `FAQ.jsx` still concretely describes a live Premium tier (Claude access, 5 Claude + 10 Basic recipes/hr) with no price shown anywhere on the site.
+5. **Hard-coded rate limits** — `FAQ.jsx` (`generation-limit`, `premium` entries) still hard-codes free/premium quota numbers (2+3/hr, 5+10/hr) as static JSX; `_redirects` still proxies a live `/app-config` endpoint that could be the source of truth instead.
+6. **No 404 route** — `App.jsx`'s `<Routes>` still has no catch-all (now 6 explicit routes: `/`, `/privacy`, `/policy`, `/terms`, `/faq`, `/contact`); `_redirects` still serves `/index.html` for `/*`.
 ## ISSUE:ROADMAP 2026-08-03 07:08 ▸ Same three Q2 gaps persist unchanged: pulled-back social layer, dietary enum mismatch, og-worker unverifiable
 
 Re-checked against the 2026Q2 findings (2026-06-28/29) — all three remain, byte-for-byte unchanged in the current `main` tree:
