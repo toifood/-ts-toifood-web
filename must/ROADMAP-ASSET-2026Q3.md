@@ -11,6 +11,26 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ROADMAP 2026-08-24 06:23 ▸ Share funnel and SEO/JSON-LD layer removed from this repo; contact page and homepage redesign added
+
+Corrects the 2026-08-03 07:08 log, which was written after the removals below but didn't reflect them:
+
+**Removed since 2026-08-03 log (all via commits 038171b5/fb6f3454/7381a93c, 2026-08-02):**
+- `/recipe/:token` route, `SharedRecipe.jsx` page, and `functions/recipe/[token].js` Pages Function — the entire public share funnel (ingredients/steps/cook-time rendering, author card, YouTube pairing, per-recipe OG/Twitter meta, JSON-LD `Recipe` schema, noscript fallback) is gone from this repo. Commit messages: "recipe pages now served by ts-toifood-app" — functionality has moved to a different app, not been cut.
+- Practical effect: `og-worker` (resvg-wasm PNG card renderer) has no remaining caller in this repo (see ROADMAP ISSUE log).
+
+**Added since 2026-08-03 log:**
+- `/contact` page and route (`Contact.jsx`, commit 0abd9e9b, 2026-08-03).
+- Homepage redesign — avocado hero, floating navbar, app screenshot gallery, Fraunces + DM Sans typeface pairing (commits 626e2224, 73ea794d, b5c43461, 8524bf7d, 617ccb2f, 2026-08-11 to 2026-08-15).
+- Privacy Policy content reorder — "Delete Your Account" moved later in the doc (commit 33b2cdb6, 2026-08-02); wording/substance unchanged.
+
+**Confirmed still live, unchanged from prior baseline:**
+- Core generation tiers (Basic/local model vs Premium/Claude) advertised in `FAQ.jsx` and `Home.jsx`.
+- Pantry/Grocery Match features described in `FAQ.jsx`.
+- Sitemap proxy — `functions/sitemap.xml.js` fetches and re-serves the backend sitemap (1hr edge cache).
+- App Store (`id6761888929`) / Google Play (`com.toifood.app`) listings and `.well-known` universal-link config.
+- Legal docs `Terms.jsx` (last updated April 2026) and `Privacy.jsx` (last updated 11 May 2026) at `/terms` and `/privacy`.
+- Stack: React 18 + Vite + React Router v6 on Cloudflare Pages.
 ## ASSET:ROADMAP 2026-08-03 07:08 ▸ Shipped feature set unchanged since Q2; no new pillars added
 
 State confirmed identical to the 2026-06-28/29 baseline — no commits have added or removed a shipped pillar. Current confirmed-live surface:
