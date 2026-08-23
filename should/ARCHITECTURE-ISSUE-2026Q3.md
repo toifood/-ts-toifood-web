@@ -11,6 +11,18 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-08-24 06:46 ▸ No commits since `626e222` (2026-08-15) — both new findings from the 2026-08-17 06:35 entry re-verified still live on `main`, nine days stalled
+
+Re-audit of `main`: HEAD unchanged at `626e222` (`compare/626e222...main` returns zero commits), so this is a direct re-verification against current file contents, not an assumption of currency.
+
+1. **`--primary` still equals `--bg` (`#F5EFE7`)** — `frontend/src/styles/global.css:19-20` confirmed byte-for-byte: `--primary: #F5EFE7;` sits directly below the four still-commented-out candidate values (`#A3E635`, `#F59E0B`, `#F97316`, `#86EFAC`) and the original `/* --primary: #96cf24; */`. Nine days on `main` with no follow-up commit — the hero's two-tone headline, both App Store/Google Play `.btn-primary` buttons, and the hero radial glow remain visually flattened to cream-on-cream with no signal this was noticed in production.
+2. **Recipe-domain dead code still present, still unreferenced.** `frontend/src/components/AnnouncementNote.jsx`/`.css`, `frontend/src/hooks/useAnnouncementNoteManager.js`, `frontend/src/utils/announcementNote.js` remain in the tree (confirmed via current tree listing), still orphaned since the 2026-08-02 recipe-viewer removal, still imported nowhere.
+
+Carried forward, unchanged (re-verified against `626e222`):
+3. `og-worker/src/index.js` remains deployed but uncalled by anything in this repo.
+4. `/policy` route is still an undocumented-lifetime alias for `/privacy` with no removal marker.
+5. `frontend/dist/` build output is still committed to git.
+6. Hardcoded API base URL still at 2 locations (`frontend/functions/sitemap.xml.js`, `og-worker/src/index.js`); no README/CI/tests anywhere in the repo.
 ## ISSUE:ARCHITECTURE 2026-08-17 06:35 ▸ `--primary` accent token accidentally left equal to `--bg` (mid-experiment commit), breaking the hero's two-tone headline and flattening every lime-branded accent site-wide; plus recipe-domain dead code never flagged since it predates the recipe-page removal
 
 Two new findings on top of the 2026-08-10 06:54 entry (still current for the recipe-migration analysis, `og-worker` orphan status, and the `/policy` workaround — re-verified unchanged below). Five commits landed since then (HEAD `0abd9e9` → `626e222`, 2026-08-11 to 2026-08-15):
