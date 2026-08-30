@@ -11,6 +11,15 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ROADMAP 2026-08-31 08:34 ▸ No commits since 626e2224 (2026-08-15) — all three open gaps unchanged, none resolved
+
+`main` HEAD is still `626e2224`, the same commit reviewed in the 2026-08-24 06:23 log — zero commits landed in the intervening 16 days. Re-verified directly against source rather than assumed from the prior log:
+
+1. **Pricing disclosure gap, unresolved** — `Terms.jsx` "Premium Features" section still reads "Contact us for details on available premium tiers and pricing"; `FAQ.jsx`'s `premium`/`generation-limit` entries still concretely describe a live Premium tier (Claude/Anthropic access, 5 Claude + 10 Basic recipes/hr) with no price anywhere on the site.
+2. **Hard-coded rate limits, unresolved** — `FAQ.jsx` still hard-codes free/premium quota numbers (2 Premium + 3 Basic/hr free; 5 + 10/hr premium) as static JSX text. `frontend/public/_redirects` still 301-proxies `/app-config → https://api.toifood.co.nz/app-config`, confirming a runtime config endpoint exists that could be the source of truth instead — confirmed present and unchanged in the current `_redirects` file (11 rules, `/app-config` on line 10, `/* /index.html 200` catch-all on line 11).
+3. **og-worker orphaned, unresolved** — `og-worker/` (package.json, wrangler.toml, src/index.js, `@resvg/resvg-wasm` dependency) still ships with zero callers: the share funnel that used to invoke it (`/recipe/:token`, `SharedRecipe.jsx`, `functions/recipe/[token].js`) was removed 2026-08-02 and has not been reinstated. `frontend/functions/sitemap.xml.js`'s header comment still contains the dangling "same pattern as functions/recipe/[token].js" reference to a file that no longer exists in this repo.
+
+No new issues found — `App.jsx` still defines the same 6 routes with no catch-all (item previously logged as resolved-by-being-covered via `_redirects`' SPA fallback, not a true 404 — not re-flagged as it's the same known behavior, not a regression).
 ## ISSUE:ROADMAP 2026-08-24 06:23 ▸ Share funnel removed 2026-08-02 — invalidates 2026-08-03 asset log; og-worker now confirmed orphaned; pricing/404 gaps persist
 
 Reviewed against main @ 626e2224 (2026-08-15). Significant repo change since the last log (2026-08-03 07:08): three commits on 2026-08-02 (038171b5, fb6f3454, 7381a93c) removed the entire `/recipe/:token` web share funnel — route in `App.jsx`, `SharedRecipe.jsx` page, and the `functions/recipe/[token].js` Pages Function (JSON-LD, noscript fallback, OG/Twitter meta injection) — with commit messages stating "recipe pages now served by ts-toifood-app". **The 2026-08-03 07:08 ROADMAP ASSET entry postdates these removals but still lists "Public share flow" and "SEO/crawlability layer" as live, confirmed-unchanged assets — that entry is now factually wrong and should be treated as stale**, not as the current baseline.
