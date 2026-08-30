@@ -11,6 +11,18 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ROADMAP 2026-08-31 08:34 ▸ Shipped surface unchanged since 2026-08-24 log — no commits landed on main in the interim
+
+`main` is still at `626e2224` (2026-08-15), identical to the commit reviewed in the 2026-08-24 06:23 asset log. Confirmed unchanged by direct re-read of source, not carried forward blindly:
+
+- **Core generation tiers** — Basic (local model) vs Premium (Claude/Anthropic) still advertised in `FAQ.jsx` (`free`, `premium` entries) and `Home.jsx`'s feature grid.
+- **Pantry/Grocery Match** — still described in `FAQ.jsx` under the "Pantry & Grocery" category (`add-ingredients`, `grocery-match`, `pantry-match`).
+- **Routes** — `App.jsx` still serves exactly 6 routes: `/`, `/privacy`, `/policy` (alias), `/terms`, `/faq`, `/contact`.
+- **Sitemap proxy** — `functions/sitemap.xml.js` still fetches and re-serves the backend sitemap.
+- **Distribution** — App Store (`id6761888929`) and Google Play (`com.toifood.app`) links still live on `Home.jsx`, backed by unchanged `.well-known/apple-app-site-association` and `assetlinks.json`.
+- **Legal docs** — `Terms.jsx` (Last updated: April 2026) and `Privacy.jsx` (Last updated: 11 May 2026) unchanged, still routed at `/terms` and `/privacy` (+ `/policy` alias).
+- **Stack** — React 18 + Vite + React Router v6 on Cloudflare Pages (`wrangler.toml`, `_redirects`, `_headers`); no dependency changes in `frontend/package.json`.
+- **og-worker** — still present in the tree (`og-worker/src/index.js`, wrangler.toml, package.json) but with no inbound caller anywhere in `frontend/`, consistent with the 2026-08-24 finding (see ROADMAP ISSUE log item 3).
 ## ASSET:ROADMAP 2026-08-24 06:23 ▸ Share funnel and SEO/JSON-LD layer removed from this repo; contact page and homepage redesign added
 
 Corrects the 2026-08-03 07:08 log, which was written after the removals below but didn't reflect them:
