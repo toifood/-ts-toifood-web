@@ -11,6 +11,15 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ROADMAP 2026-09-07 08:03 ▸ No commits since 626e2224 (2026-08-15) — 23 days static, all three open gaps unchanged, none resolved
+
+`main` HEAD is still `626e2224`, confirmed via `compare/626e2224...main` returning zero commits. This is the same commit reviewed in the 2026-08-24 and 2026-08-31 logs — the repo has now gone 23 days without a commit. Re-verified each gap directly against current source, not carried forward from the prior log:
+
+1. **Pricing disclosure gap, unresolved** — `Terms.jsx` "Premium Features" section still reads "Contact us for details on available premium tiers and pricing"; `FAQ.jsx`'s `premium` entry ("Free users get 2 Premium recipes per hour") and `generation-limit` entry ("Free users get 2 Premium and 3 Basic recipes per hour. Premium users get 5 Claude and 10 Basic per hour.") still concretely describe a live, metered Premium tier with no price disclosed anywhere on the site.
+2. **Hard-coded rate limits, unresolved** — the same `FAQ.jsx` quota numbers remain static JSX text. `frontend/public/_redirects` still 301-proxies `/app-config → https://api.toifood.co.nz/app-config` (line 10 of 11, catch-all `/* /index.html 200` on line 11), confirming a runtime config endpoint exists that could be the source of truth instead of hard-coded copy.
+3. **og-worker orphaned, unresolved** — `og-worker/` (package.json, wrangler.toml, src/index.js, `@resvg/resvg-wasm` dependency) still ships with zero callers; confirmed again via full-tree search that no `functions/recipe/` path exists anywhere in the repo. `frontend/functions/sitemap.xml.js`'s header comment still contains the dangling "same pattern as functions/recipe/[token].js" reference to a file removed 2026-08-02.
+
+No new issues found — `App.jsx` still defines the same 6 routes (`/`, `/privacy`, `/policy`, `/terms`, `/faq`, `/contact`) with no catch-all; not re-flagged per the 2026-08-31 log's determination that this is known behavior covered by `_redirects`' SPA fallback, not a regression.
 ## ISSUE:ROADMAP 2026-08-31 08:34 ▸ No commits since 626e2224 (2026-08-15) — all three open gaps unchanged, none resolved
 
 `main` HEAD is still `626e2224`, the same commit reviewed in the 2026-08-24 06:23 log — zero commits landed in the intervening 16 days. Re-verified directly against source rather than assumed from the prior log:
