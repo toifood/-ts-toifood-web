@@ -11,6 +11,15 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ROADMAP 2026-09-28 09:50 ▸ No commits since 626e2224 (2026-08-15): 44 days without a commit, and all three open gaps are still unresolved as Q3 closes
+
+`main` HEAD is still `626e2224`. `compare/626e2224...main` returns `ahead_by: 0`. This is the same commit reviewed in the 2026-08-24, 2026-08-31 and 2026-09-07 logs, so the repo has now gone 44 days without a commit. This is the last review before 2026Q3 ends, and **all three gaps below will carry into 2026Q4 unresolved**. I checked each gap again against the current source rather than copying the earlier results:
+
+1. **Pricing disclosure gap (unresolved for all of Q3).** `Terms.jsx` line 21 ("Premium Features") still says "Some features require a premium subscription. Contact us for details on available premium tiers and pricing." `FAQ.jsx` line 9 (`premium`: "Free users get 2 Premium recipes per hour") and line 10 (`generation-limit`: "Free users get 2 Premium and 3 Basic recipes per hour. Premium users get 5 Claude and 10 Basic per hour.") still describe a live, metered Premium tier. No price appears anywhere on the site. `Terms.jsx` is still marked "Last updated: April 2026" and has not been revised in the two quarters since.
+2. **Hard-coded rate limits (unresolved for all of Q3).** The quota numbers in `FAQ.jsx` lines 9–10 are still static JSX text. `frontend/public/_redirects` still 301-redirects `/app-config → https://api.toifood.co.nz/app-config` (line 10 of 11; the `/* /index.html 200` catch-all is line 11). That runtime config endpoint could supply these numbers instead of hard-coded copy.
+3. **og-worker orphaned (unresolved since 2026-08-24).** `og-worker/` (`package.json`, `wrangler.toml`, `src/index.js`, `src/logo-small.png`, and the `@resvg/resvg-wasm` dependency) is still in the tree. A full-tree path search again finds no `recipe` path anywhere in the repo. A grep of `App.jsx`, `Home.jsx`, `index.html`, `sitemap.xml.js` and `_redirects` finds no reference to `toifood-og`, `og-worker` or `og-image`. The header comment in `frontend/functions/sitemap.xml.js` (lines 1–4) still points to "functions/recipe/[token].js", a file that was removed on 2026-08-02.
+
+No new issues found. `App.jsx` still defines the same 6 routes (lines 18–23: `/`, `/privacy`, `/policy`, `/terms`, `/faq`, `/contact`) and has no catch-all route. This is not flagged again: it is known behaviour already handled by the SPA fallback in `_redirects`, not a regression.
 ## ISSUE:ROADMAP 2026-09-07 08:03 ▸ No commits since 626e2224 (2026-08-15) — 23 days static, all three open gaps unchanged, none resolved
 
 `main` HEAD is still `626e2224`, confirmed via `compare/626e2224...main` returning zero commits. This is the same commit reviewed in the 2026-08-24 and 2026-08-31 logs — the repo has now gone 23 days without a commit. Re-verified each gap directly against current source, not carried forward from the prior log:
