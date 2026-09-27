@@ -11,6 +11,41 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ARCHITECTURE 2026-09-28 10:10 ▸ Baseline re-checked at unchanged `main` HEAD `626e222` (2026-08-15, 44 days). The architecture described in the 2026-08-17 06:35 entry still holds; this entry adds the inventory of the mobile deep-link files, the release branches and the committed `dist/`, plus a more precise recovery procedure
+
+`gh api repos/toifood/ts-toifood-web/compare/626e222...main` → 0 commits. The 2026-08-17 06:35 entry is still the current description. Spot checks:
+- Routes in `frontend/src/App.jsx`: `/`, `/privacy`, `/policy`, `/terms`, `/faq`, `/contact`.
+- `frontend/package.json`: React 18.3, react-router-dom 6.26, Vite 5.4, no TypeScript.
+- `og-worker/package.json`: `@resvg/resvg-wasm ^2.6.2`.
+- Both `wrangler.toml` files are unchanged (`toifood-web` Pages, `toifood-og` Worker, `compatibility_date = "2024-09-23"`).
+- `global.css` tokens: Fraunces / DM Sans, `--primary` still set to the wrong value (see ISSUE log).
+
+**Additions to the current-state record**
+
+1. **Deep-link and store integration files, served from `frontend/public/.well-known/`:**
+   - `apple-app-site-association`: app ID `4NW9GRL499.com.toifood.app`, paths `["/recipe/*"]`.
+   - `assetlinks.json`: package `com.toifood.app`, fingerprint still a placeholder.
+   - `index.html` has the `apple-itunes-app` Smart App Banner (`app-id=6761888929`).
+   - The homepage's App Store (`id6761888929`) and Google Play (`com.toifood.app`) CTAs are hardcoded twice each in `Home.jsx` (hero and bottom CTA).
+   - These files are the only remaining link between this repo and the recipe-sharing flow that moved to `ts-toifood-app`. Their ownership is unresolved (see ISSUE log).
+
+2. **Branches and releases:** `main` is the only active branch. `1-1-2` and `1-1-3` are fully merged snapshots of `4bbf230` (2026-05-14), 19 commits behind `main` with nothing unmerged. There are no open PRs and no tags.
+
+3. **Committed `frontend/dist/` contents:** 12 files. They include `assets/index-DIpYi2ay.js`, `assets/index-Ow8UHuHH.css`, `index.html` with the Fraunces + DM Sans `<link>`s, and the legacy `Americana.otf`. They do **not** include the 2026-08-15 redesign images. Treat this folder as a stale artifact, not a deployable snapshot.
+
+4. **Third-party runtime dependencies on every page:** Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`) and ionicons 7.2.1 from `unpkg.com`, which only the orphaned `AnnouncementNote` uses. `toifood-og` depends on `api.toifood.co.nz/recipes/public/:token` (3 s timeout, `cacheTtl: 300`) and on Twemoji 14.0.2 from `cdnjs.cloudflare.com` (3 s timeout, falls back to a text emoji).
+
+**Recovery procedure (more precise than earlier entries; still redeploy-only and stateless)**
+
+1. `toifood-web`: from `frontend/`, run `npm ci && npm run build`, then deploy the freshly built `dist/` to Cloudflare Pages project `toifood-web`. **Never deploy the committed `frontend/dist/` without rebuilding**, because it's missing the hero, feature and promo images. `functions/sitemap.xml.js` deploys with the Pages project and proxies `https://api.toifood.co.nz/sitemap.xml` (`cacheTtl: 3600`). It needs the backend to be up, but has no state of its own.
+2. `toifood-og`: from `og-worker/`, run `npm ci && npx wrangler deploy`. It's independent of step 1 and has no bindings, KV or secrets.
+3. After deploying, check:
+   - `/`, `/faq` and `/privacy` return the SPA.
+   - `/assets/*` returns `Cache-Control: public, max-age=31536000, immutable`, and HTML routes return `no-store` (per `frontend/public/_headers`).
+   - `/sitemap.xml` returns `application/xml`.
+   - `/.well-known/apple-app-site-association` returns JSON.
+
+Neither service has a database, Prisma schema, secrets or server-side state, so there's no data to back up or restore.
 ## ASSET:ARCHITECTURE 2026-09-14 08:33 ▸ Baseline re-verified at unchanged `main` HEAD `626e222` (2026-08-15) — two-service stateless Cloudflare architecture (marketing-only `toifood-web` + orphaned `toifood-og` worker) stands as described in the 2026-08-17 06:35 entry
 
 Re-verified against live file contents on `main`: `compare/626e222...main` shows zero commits in the 30 days since the last commit (and 14 days since the 2026-08-31 audit), so the 2026-08-17 06:35 entry — Fraunces + DM Sans typography, the avocado-hero/screenshot-gallery/floating-pill-navbar redesign, `success@toifood.co.nz` support standardization, and the redeploy-only recovery posture (single Cloudflare Pages `vite build` → `dist` for `toifood-web`, independent `wrangler deploy` for the untouched `toifood-og` worker, no database/Prisma/server state in either service) — remains the authoritative current-state description without amendment. Spot-checked directly: `frontend/package.json` (React 18.3, Vite 5.4, React Router 6.26, no TypeScript), `og-worker/package.json` (`@resvg/resvg-wasm ^2.6.2`), `frontend/src/App.jsx` routes (`/`, `/privacy`, `/policy`, `/terms`, `/faq`, `/contact` — still no `/recipe/:token`), and both `wrangler.toml` files all match prior entry exactly.
