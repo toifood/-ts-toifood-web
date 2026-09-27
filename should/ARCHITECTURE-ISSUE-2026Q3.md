@@ -11,6 +11,42 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-09-28 10:10 ▸ Still no commits since `626e222` (2026-08-15, 44 days). Re-audit found four new problems: mobile deep-link files still point at the retired `/recipe/*` path and hold a placeholder Android fingerprint, the committed `dist/` is missing the redesign's images, ionicons loads from unpkg on every page for dead code only, and `AnnouncementNote` has a null-guard ordering bug
+
+Re-audit of `main`: HEAD is still `626e222` (`gh api repos/toifood/ts-toifood-web/compare/626e222...main` → `total_commits: 0`). All six findings in the 2026-09-14 08:33 entry were re-checked against current file contents and are all still open (see "Carried forward" below). This pass also covered files that no earlier Q3 entry examined.
+
+**New findings**
+
+1. **Mobile deep-link config still targets a path this site no longer serves.**
+   - `frontend/public/.well-known/apple-app-site-association` still claims `"paths": ["/recipe/*"]` for `4NW9GRL499.com.toifood.app`. The `/recipe/:token` route and `functions/recipe/[token].js` were both removed on 2026-08-02, and recipe pages now live on `app.toifood.co.nz` (`ts-toifood-app`).
+   - `frontend/public/.well-known/assetlinks.json` still holds the literal placeholder `"sha256_cert_fingerprints": ["REPLACE_WITH_SHA256_FROM_PLAY_CONSOLE"]`. Android App Links verification for `com.toifood.app` therefore can never succeed from this domain.
+   - `App.jsx` has no catch-all `<Route path="*">`, and `_redirects` ends with `/* /index.html 200`. Any old shared `/recipe/<token>` link opened in a browser (or on iOS with the app not installed) returns HTTP 200 with only the Navbar and Footer: no 404 and no redirect to `app.toifood.co.nz`.
+   - Decide which domain owns universal links. Then either move both `.well-known` files to `ts-toifood-app`, or add a `/recipe/* https://app.toifood.co.nz/recipe/:splat 301` rule and fill in the real Play Console fingerprint. Also add a `*` NotFound route.
+   - `index.html`'s `apple-itunes-app` meta still has an empty `app-argument=`, so the Smart App Banner can't deep-link either.
+
+2. **The committed `frontend/dist/` is stale and doesn't match the source; this is a recovery hazard.** The tree contains 12 files under `frontend/dist/`:
+   - It still ships `Americana.otf` (dropped from `--font-display` in `b5c4346`).
+   - It has none of the redesign's assets: `hero-char.png`, `hero-char2.png`, `hero-char3.png`, `hero-food.png`, `features/avocado_*_cutout.png` (×6) and `promo/1-7.png`. `frontend/src/pages/Home.jsx` references all of them.
+   - Because `_redirects` rewrites `/*` → `/index.html 200`, deploying this committed `dist/` without a rebuild would serve HTML in place of every hero, feature and screenshot image (broken images, not 404s).
+   - `frontend/wrangler.toml` (`pages_build_output_dir = "dist"`) makes a direct `wrangler pages deploy` of the committed folder a plausible mistake. This makes the 2026-08-03 07:25 "stale dist caused a prod routing bug" finding more urgent: remove `frontend/dist/` from git and add it to `.gitignore`.
+
+3. **A third-party script loads on every page, but only dead code uses it.** `frontend/index.html` (and `dist/index.html`) loads `https://unpkg.com/ionicons@7.2.1/dist/ionicons/ionicons.esm.js` plus the `nomodule` fallback, with no SRI hash. The only `<ion-icon>` consumer in `frontend/src/` is the orphaned `components/AnnouncementNote.jsx`: Home, FAQ, Navbar, Footer, Contact, Privacy and Terms all use inline SVG or text. That means an external runtime dependency and render cost on every page view with no benefit. Remove it together with the dead AnnouncementNote code (open item 2 in the 2026-09-14 entry).
+
+4. **`AnnouncementNote.jsx` null guard runs too late.** `const ts = TYPE_STYLES[config.type ?? 'note'];` runs before `if (!config || !config.text) return null;`:
+   - A `null`/`undefined` `config` throws `TypeError` before the guard is reached.
+   - Any `config.type` not among the six keys makes `ts` undefined, which crashes on `ts.iconBg`.
+
+   `resolveNote()` in `utils/announcementNote.js` can return `null`, so this crash path is real if the component is ever revived. It's one more reason to delete the whole unit rather than keep it "for later".
+
+5. **Branch hygiene.** Branches `1-1-2` and `1-1-3` both point at `4bbf230` ("prior to recipe refacter", 2026-05-14): 0 commits ahead of `main` and 19 behind. The "flagged 'prior to recipe refacter' work" tracked since the 2026-07-20 07:17 entry has no unmerged content left. The branches are fully merged snapshots and can be deleted (or tagged if they're meant as release markers).
+
+**Carried forward** (re-checked against `626e222`, all still open):
+- `--primary: #F5EFE7;` still equals `--bg` at `frontend/src/styles/global.css:19-20`, with the lime `#96cf24` still commented out. It has been on `main` for 44 days with no fix.
+- Recipe-domain dead code (`AnnouncementNote.jsx`/`.css`, `useAnnouncementNoteManager.js`, `announcementNote.js`) is still imported nowhere.
+- `og-worker` (`toifood-og`) is still deployed, and nothing in this repo calls it.
+- The `/policy` alias for `/privacy` still has no stated lifetime or removal marker.
+- Hardcoded `https://api.toifood.co.nz` still appears in `frontend/functions/sitemap.xml.js` and `og-worker/src/index.js`. `sitemap.xml.js` still has a stale comment pointing at the deleted `functions/recipe/[token].js`.
+- The ten API-path 301s in `frontend/public/_redirects` (`/auth/*`, `/recipes/*`, …, `/app-config`) remain. The repo still has no README, CI or tests.
 ## ISSUE:ARCHITECTURE 2026-09-14 08:33 ▸ No commits since `626e222` (2026-08-15) — both findings from the 2026-08-17 06:35 entry re-verified still live on `main`, 30 days stalled
 
 Re-audit of `main`: HEAD unchanged at `626e222` (`compare/626e222...main` returns zero commits, confirmed via `gh api repos/toifood/ts-toifood-web/compare/626e222...main`), so this is a direct re-verification against current file contents, not an assumption of currency.
