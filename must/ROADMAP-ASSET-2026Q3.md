@@ -11,6 +11,19 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ROADMAP 2026-09-28 09:50 ▸ Shipped surface unchanged since the 2026-09-07 log: main has stayed at 626e2224 for 44 days, the Q3 closing baseline
+
+`main` is still at `626e2224` (2026-08-15, "feat: homepage avocado hero, floating navbar, email cleanup"), and `compare/626e2224...main` returns 0 commits. This is the baseline carried into 2026Q4. I re-read the source to confirm it:
+
+- **Core generation tiers:** the `FAQ.jsx` entries `premium` (line 9) and `generation-limit` (line 10) and the feature grid in `Home.jsx` still advertise Basic (local model) and Premium (Claude/Anthropic).
+- **Pantry/Grocery Match:** still described in `FAQ.jsx` under the "Pantry & Grocery" category.
+- **Routes:** `App.jsx` still serves exactly 6 routes: `/`, `/privacy`, `/policy` (alias), `/terms`, `/faq`, `/contact`.
+- **Sitemap proxy:** `functions/sitemap.xml.js` still fetches and re-serves `api.toifood.co.nz/sitemap.xml` with a 1-hour edge cache (`cacheTtl: 3600`).
+- **API proxying:** `_redirects` still carries 10 rules pointing at `api.toifood.co.nz` (`/auth`, `/recipes`, `/pantry`, `/user`, `/users`, `/lists`, `/flows`, `/stats`, `/health`, `/app-config`) plus the SPA catch-all.
+- **Distribution:** the App Store (`id6761888929`) and Google Play (`com.toifood.app`) links are still live on `Home.jsx`. The `.well-known/apple-app-site-association` and `assetlinks.json` files behind them are unchanged.
+- **Legal docs:** `Terms.jsx` (Last updated: April 2026) and `Privacy.jsx` (Last updated: 11 May 2026) are unchanged and still served at `/terms` and `/privacy` (plus the `/policy` alias).
+- **Stack:** React 18, Vite and React Router v6 on Cloudflare Pages (`wrangler.toml`, `_redirects`, `_headers`). `frontend/package.json` has no dependency changes.
+- **og-worker:** still in the tree (`og-worker/src/index.js`, `wrangler.toml`, `package.json`, `logo-small.png`). A full-tree search confirms it still has no caller, which matches the 2026-08-24 finding (see item 3 in the ROADMAP ISSUE log).
 ## ASSET:ROADMAP 2026-09-07 08:03 ▸ Shipped surface unchanged since 2026-08-31 log — main static at 626e2224 for 23 days
 
 `main` remains at `626e2224` (2026-08-15), identical to the commit reviewed in the last three logs. Confirmed unchanged by direct re-read of source:
