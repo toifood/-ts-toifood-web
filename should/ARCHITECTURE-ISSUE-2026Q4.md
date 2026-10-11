@@ -11,6 +11,49 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-10-12 10:41 ▸ Still no commits since `626e222` (58 days). Every live finding from 2026-10-05 is unchanged in production. This pass also found two new problems: the proposed `robots.txt` fix would not work, because the `toifood.co.nz` sitemap lists only `app.toifood.co.nz` URLs, and the AASA file is served as `application/octet-stream`
+
+This entry updates and supersedes the 2026-10-05 10:05 entry below. Re-audit: `gh api repos/toifood/ts-toifood-web/compare/626e222...main` → `total_commits: 0`. `pushed_at` is still `2026-08-15T11:06:46Z`. There are no PRs. Branches `1-1-2` and `1-1-3` are still at `4bbf230`. All twelve committed `frontend/dist/` files are still tracked. The live site at `toifood.co.nz` was re-checked with `curl`.
+
+**New findings**
+
+1. **The sitemap only lists `app.toifood.co.nz` URLs, which changes the right `robots.txt` fix.** `https://toifood.co.nz/sitemap.xml` (served by `frontend/functions/sitemap.xml.js`) returns valid XML with **538** `<loc>` entries. All 538 are `https://app.toifood.co.nz/recipe/*`. None are marketing pages (`/`, `/faq`, `/privacy`, `/terms`, `/contact`). By default, search engines only accept sitemap URLs on the same host as the sitemap itself. So the fix proposed on 2026-10-05 (point `toifood.co.nz/robots.txt` at `https://toifood.co.nz/sitemap.xml`) would replace a sitemap that returns HTML with one whose URLs are rejected as cross-host. Corrected fix, choose one:
+   - **(a)** Have `ts-toifood-app` serve the sitemap at `app.toifood.co.nz/sitemap.xml` by moving `sitemap.xml.js` there. Keep `toifood.co.nz/robots.txt` pointing at it (cross-submitting from the app host's own robots.txt is also valid). Then delete `frontend/functions/sitemap.xml.js` from this repo.
+   - **(b)** Keep the proxy here, and add `Sitemap: https://toifood.co.nz/sitemap.xml` to **`app.toifood.co.nz/robots.txt`**. Cross-submission is valid when the robots.txt for the URLs' own host declares it.
+
+   Either way, marketing pages still need a sitemap. Add a small static `frontend/public/sitemap-pages.xml`, or a sitemap index that references both.
+2. **`/.well-known/apple-app-site-association` is served as `application/octet-stream`.** The file has no extension, and `frontend/public/_headers` sets no `Content-Type` for it. Apple's CDN usually tolerates this, but `application/json` is the documented type. Add `/.well-known/apple-app-site-association` → `Content-Type: application/json` to `_headers`. Also exempt `/.well-known/*` from the global `no-store` rule; it currently matches (see item 3).
+
+**Re-confirmed live on 2026-10-12** (all unchanged since 2026-10-05):
+
+3. `_headers` `/*` `no-store` still applies to every asset:
+   - `/hero-char.png` (1,525,241 B) is served `no-store`.
+   - `/assets/index-C5Rnj4h4.js` (190,361 B) still gets the merged `no-store, no-cache, must-revalidate, s-maxage=0, public, max-age=31536000, immutable`.
+   - `/Americana.otf` (34,040 B) is still served, and nothing references it.
+4. `robots.txt` still points to `https://app.toifood.co.nz/sitemap.xml`, which still returns `200 text/html`.
+5. `og:image` is still the relative `/logo.png`, with no `og:url` or canonical link.
+6. `/recipe/abc` still returns `200 text/html` (blank SPA route). `assetlinks.json` still contains `REPLACE_WITH_SHA256_FROM_PLAY_CONSOLE`.
+7. The deployed bundle is still `index-C5Rnj4h4.js` / `index-C8-5qEQ2.css`, but the committed `dist/` contains different files.
+8. Ionicons 7.2.1 is still loaded from unpkg (ESM + `nomodule`, no SRI).
+
+**Carried forward unchanged:**
+- `--primary` still equals `--bg` (`global.css:19-20`), now for 58 days.
+- Dead `AnnouncementNote*` / `useAnnouncementNoteManager.js` / `utils/announcementNote.js`.
+- Orphaned `og-worker`.
+- `/policy` alias.
+- Empty `app-argument=`.
+- Ten API 301s in `_redirects`.
+- Hardcoded `https://api.toifood.co.nz` in `functions/sitemap.xml.js` and `og-worker/src/index.js`.
+- Stale branches.
+- No README, CI or tests.
+
+**Suggested order (revised):**
+1. `_headers` scoping, adding the `.well-known` content-type and exemption.
+2. Set `--primary` back to `#96cf24`.
+3. Decide sitemap ownership (option a or b above) and add a marketing-pages sitemap. Do **not** just repoint `robots.txt` at `toifood.co.nz/sitemap.xml`.
+4. `/recipe/*` 301 redirect and NotFound route.
+5. Absolute OG URLs.
+6. One cleanup commit: `dist/`, `Americana`, ionicons, `AnnouncementNote*`, stale branches.
 ## ISSUE:ARCHITECTURE 2026-10-05 10:05 ▸ Q4 opens with no commits since `626e222` (2026-08-15, 51 days). Live checks found three new production problems: `_headers` makes every image and font `no-store` (and gives hashed bundles contradictory Cache-Control), `robots.txt` points crawlers at a sitemap URL that returns HTML, and the share-card meta uses relative image URLs. Old `/recipe/*` links now confirmed to return 200 in production
 
 This is the first Q4 entry; it supersedes the 2026-09-28 10:10 entry in `should/ARCHITECTURE-ISSUE-2026Q3.md`. Re-audit of `main`: `gh api repos/toifood/ts-toifood-web/compare/626e222...main` → `total_commits: 0`, there are no PRs and no tags, and `pushed_at` is still `2026-08-15T11:06:46Z`. This pass also checked the live deployment at `toifood.co.nz` with `curl`, which no earlier entry did.
