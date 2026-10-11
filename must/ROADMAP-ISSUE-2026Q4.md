@@ -11,6 +11,18 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ROADMAP 2026-10-12 10:28 ▸ Weekly re-check: main is still at 626e2224, now 58 days without a commit. All six open gaps were re-verified against source and none is resolved
+
+`main` HEAD is still `626e2224` (2026-08-15, "feat: homepage avocado hero, floating navbar, email cleanup"). `compare/626e2224...main` returns `ahead_by: 0` with an empty file list. This updates the 2026-10-05 entry. Every item below was re-read from source today.
+
+1. **Pricing disclosure gap: still open.** `frontend/src/pages/Terms.jsx` still has the "Premium Features" section with the sentence "Contact us for details on available premium tiers and pricing." The date still reads "Last updated: April 2026", so the terms are now more than two quarters old. `FAQ.jsx` (`premium`, `generation-limit`) still describes a live, metered Premium tier, and no price appears anywhere on the site.
+2. **Hard-coded rate limits: still open.** `FAQ.jsx` still has "Free users get 2 Premium and 3 Basic recipes per hour. Premium users get 5 Claude and 10 Basic per hour." written as static JSX. `_redirects` still proxies `/app-config` to `api.toifood.co.nz`, but the FAQ does not read from it.
+3. **og-worker orphaned: still open.** Nothing calls `og-worker/`. The header comment in `frontend/functions/sitemap.xml.js` (line 4) still refers to `functions/recipe/[token].js`, which was deleted on 2026-08-02.
+4. **assetlinks fingerprint placeholder: still open.** `frontend/public/.well-known/assetlinks.json` still has `sha256_cert_fingerprints: ["REPLACE_WITH_SHA256_FROM_PLAY_CONSOLE"]`. Android App Links for `com.toifood.app` cannot verify.
+5. **AASA points at a removed route: still open.** `apple-app-site-association` still claims `"paths": ["/recipe/*"]` for `4NW9GRL499.com.toifood.app`. `App.jsx` registers only `/`, `/privacy`, `/policy`, `/terms`, `/faq` and `/contact`. The `/* /index.html 200` catch-all serves an empty SPA shell for `/recipe/*` when the app is not installed.
+6. **AnnouncementNote stack orphaned: still open.** `App.jsx`, `main.jsx`, `Home.jsx` and `FAQ.jsx` import only React, the router, layout components and `useReveal`. Nothing imports `AnnouncementNote.jsx`/`.css`, `useAnnouncementNoteManager.js` or `utils/announcementNote.js`.
+
+**Priority note:** items 4 and 5 break the mobile app's share and deep-link flow in production today. Items 1 and 2 are a disclosure risk while Premium is advertised as live. Items 3 and 6 are dead-code cleanup.
 ## ISSUE:ROADMAP 2026-10-05 09:53 ▸ First Q4 review: main still at 626e2224 (51 days, no commits). The three Q3 gaps carry over, and three new gaps were found: a placeholder assetlinks fingerprint, AASA paths pointing at a removed route, and an orphaned AnnouncementNote stack
 
 `main` HEAD is still `626e2224` (2026-08-15). `compare/626e2224...main` returns `ahead_by: 0`, so the repo has gone 51 days without a commit. This is the first 2026Q4 entry. I re-checked all three gaps carried over from Q3 against the current source:
