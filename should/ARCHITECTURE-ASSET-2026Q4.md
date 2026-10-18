@@ -11,6 +11,41 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ARCHITECTURE 2026-10-19 09:22 ▸ `main` HEAD `626e222` unchanged (65 days). Live state re-verified with no drift, and the deployed bundle is still `index-C5Rnj4h4.js`. The cross-repo sitemap contract is now documented: `ts-toifood-app/public/robots.txt` (since `4e0041c`, 2026-08-02) declares this repo's `/sitemap.xml` proxy, which makes the proxy load-bearing for app-host SEO
+
+This entry updates the 2026-10-12 10:41 entry below. `gh api repos/toifood/ts-toifood-web/compare/626e222...main` returns 0 commits. `main` is at `626e222`; `1-1-2` and `1-1-3` are at `4bbf230`. There are no PRs or tags. The source architecture has not changed:
+- `frontend/` is the `toifood-web` Pages project: React 18.3, react-router-dom 6.26, Vite 5.4. Routes are `/`, `/privacy`, `/policy`, `/terms`, `/faq` and `/contact`. There is one Pages Function, `functions/sitemap.xml.js`.
+- `og-worker/` is the `toifood-og` Worker. It has no callers.
+- No database, Prisma schema, secrets or server-side state.
+
+**Live deployment state** (checked with `curl` on 2026-10-19; matches 2026-10-12 except where noted)
+
+| Path | Status / type | Notes |
+|---|---|---|
+| `/` | 200 `text/html` | `no-store …` (intended) |
+| `/assets/index-C5Rnj4h4.js` | 200 JS, 190,361 B | merged `no-store … immutable`; same hash since 2026-10-05 |
+| `/hero-char.png` | 200 PNG, 1,525,241 B | `no-store` |
+| `/Americana.otf` | 200 `font/otf`, 34,040 B | unused |
+| `/sitemap.xml` | 200 `application/xml` | 538 `<loc>`, all `app.toifood.co.nz/recipe/*`; **corrected:** latest `lastmod` `2026-10-05T02:51:44Z` (not 2026-08-07) |
+| `/robots.txt` | 200 `text/plain`, 71 B | `Sitemap: https://app.toifood.co.nz/sitemap.xml` (that URL returns `text/html`) |
+| `/health` | 301 → `https://api.toifood.co.nz/health` | `no-store` on the redirect |
+| `/recipe/abc` | 200 `text/html` | blank SPA route |
+| `/.well-known/assetlinks.json` | 200 `application/json` | placeholder `REPLACE_WITH_SHA256…` |
+| `/.well-known/apple-app-site-association` | 200 `application/octet-stream` | no content-type override |
+| `app.toifood.co.nz/robots.txt` | 200 `text/plain`, `public, max-age=14400` | **new row:** `Sitemap: https://toifood.co.nz/sitemap.xml` |
+| `app.toifood.co.nz/sitemap.xml` | 200 `text/html` | SPA fallback, not a sitemap |
+
+**Cross-repo sitemap contract** (new)
+- `api.toifood.co.nz` (`ts-toifood-back`) generates the XML and is actively updating it. Recipe `lastmod` values run from 2026-09-23 to 2026-10-05.
+- `toifood.co.nz/sitemap.xml` (this repo, `frontend/functions/sitemap.xml.js`) is a pass-through proxy. The URLs it serves belong to `app.toifood.co.nz`.
+- `app.toifood.co.nz/robots.txt` (`ts-toifood-app/public/robots.txt`, commit `4e0041c`, 2026-08-02) declares `https://toifood.co.nz/sitemap.xml`. That declaration is what makes the cross-host submission valid.
+- Effect: removing or renaming `functions/sitemap.xml.js`, or changing the Pages domain, silently breaks recipe indexing for `ts-toifood-app`. Any change to that file has to be coordinated with the app repo. The only broken link in the chain is this repo's own `robots.txt`, which points the other way at the app host's HTML fallback.
+
+**Recovery procedure** (unchanged from 2026-10-12; step 3 extended)
+1. `toifood-web`: in `frontend/`, run `npm ci && npm run build`, then deploy the fresh `dist/`. Never deploy the committed `frontend/dist/`.
+2. `toifood-og`: in `og-worker/`, run `npm ci && npx wrangler deploy`.
+3. Check the result against the table above. `/sitemap.xml` should return `application/xml` with a non-zero `<loc>` count. A zero count or an HTML body means the upstream `api.toifood.co.nz/sitemap.xml` is down. Also confirm that `app.toifood.co.nz/robots.txt` still declares `https://toifood.co.nz/sitemap.xml`. If it doesn't, the cross-host contract is broken in `ts-toifood-app`, not here.
+4. Rollback: roll back to a previous deployment in Cloudflare Pages. There is no state to restore.
 ## ASSET:ARCHITECTURE 2026-10-12 10:41 ▸ `main` HEAD `626e222` unchanged (58 days). The live-deployment table was re-verified with no drift, and new rows record the sitemap contents and the AASA content-type. Ownership is clarified: the sitemap here only indexes `app.toifood.co.nz` recipe pages
 
 This entry updates the 2026-10-05 10:05 baseline below. `gh api repos/toifood/ts-toifood-web/compare/626e222...main` → 0 commits. Branches: `main` at `626e222`; `1-1-2` and `1-1-3` at `4bbf230`. No PRs or tags. The source architecture is unchanged from the 2026-10-05 entry:
