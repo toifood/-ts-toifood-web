@@ -11,6 +11,54 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-10-19 09:22 ▸ Still no commits since `626e222` (65 days), and every live finding from 2026-10-12 is still present in production. Correction: the cross-host sitemap problem raised on 2026-10-12 is already solved upstream. `ts-toifood-app/public/robots.txt` has cross-submitted `https://toifood.co.nz/sitemap.xml` since 2026-08-02 (`4e0041c`), so the one-line `robots.txt` fix in this repo is valid after all
+
+This entry updates and supersedes the 2026-10-12 10:41 entry below. Re-audit:
+- `gh api repos/toifood/ts-toifood-web/compare/626e222...main` returns `total_commits: 0`.
+- `pushed_at` is still `2026-08-15T11:06:46Z`.
+- There are no PRs.
+- Branches `1-1-2` and `1-1-3` are still at `4bbf230`.
+- `frontend/dist/` still tracks 12 files.
+- The live site was re-checked with `curl` on 2026-10-19.
+
+**Corrections to the 2026-10-12 entry**
+
+1. **Sitemap ownership is already settled: option (b) has been live since August.** `https://app.toifood.co.nz/robots.txt` returns `200 text/plain` (`public, max-age=14400`) with `Sitemap: https://toifood.co.nz/sitemap.xml`. That file is `ts-toifood-app/public/robots.txt`, added in `4e0041c` on 2026-08-02 ("Airbnb model — anonymous public recipe pages"). The host that owns the 538 `app.toifood.co.nz/recipe/*` URLs already declares this repo's sitemap, so cross-host submission is valid today. That means:
+   - The 2026-10-05 fix is correct and is the only change needed here. In `frontend/public/robots.txt`, replace `Sitemap: https://app.toifood.co.nz/sitemap.xml` (which still returns `200 text/html`) with `Sitemap: https://toifood.co.nz/sitemap.xml`. The two hosts then point at the same valid XML sitemap.
+   - Do **not** move `functions/sitemap.xml.js` to `ts-toifood-app` (option a). The app repo's robots.txt depends on the proxy staying on this host. Treat `functions/sitemap.xml.js` as load-bearing for `ts-toifood-app` SEO, and add a comment there that names this dependency. Its header comment still refers to the deleted `functions/recipe/[token].js`.
+   - The gap for marketing pages still applies. `/`, `/faq`, `/privacy`, `/terms` and `/contact` are in no sitemap. Add a static `frontend/public/sitemap-pages.xml` and list it as a second `Sitemap:` line in `robots.txt`.
+2. **Sitemap freshness was misreported.** The 2026-10-12 asset entry gave the latest `lastmod` as 2026-08-07. On 2026-10-19 the latest `lastmod` is `2026-10-05T02:51:44Z`, with others on 09-23, 09-25, 09-26 and 09-28. Since 10-05 predates the 10-12 audit, that figure was wrong when it was written. The `<loc>` count is still 538, all on `app.toifood.co.nz`. The upstream generator is active, so this proxy is serving real, current data to crawlers.
+
+**Re-confirmed live on 2026-10-19 (unchanged since 2026-10-05):**
+
+3. The `_headers` rule `/*` `no-store` still matches every asset:
+   - `/hero-char.png` (1,525,241 B) is served `no-store`.
+   - `/Americana.otf` (34,040 B) is served `no-store` and nothing references it. `global.css:3-9` still has the `@font-face`.
+   - `/assets/index-C5Rnj4h4.js` (190,361 B) still gets the merged header `no-store, no-cache, must-revalidate, s-maxage=0, public, max-age=31536000, immutable`.
+4. `/.well-known/apple-app-site-association` is still served as `application/octet-stream` with `no-store`.
+5. `og:image` is still the relative `/logo.png`. There is still no `og:url` and no canonical link.
+6. `/recipe/abc` still returns `200 text/html`, a blank SPA route. `assetlinks.json` still contains `REPLACE_WITH_SHA256_FROM_PLAY_CONSOLE`.
+7. The deployed bundle is still `index-C5Rnj4h4.js` / `index-C8-5qEQ2.css`, so there has been no redeploy since at least 2026-10-05. It still differs from the committed `dist/`.
+8. Ionicons 7.2.1 still loads from unpkg (ESM and `nomodule` builds, no SRI). Its only consumer is the dead `AnnouncementNote.jsx`.
+
+**Carried forward unchanged:**
+- `--primary: #F5EFE7` still equals `--bg` (`global.css:19-20`), now for 65 days.
+- Dead `AnnouncementNote*`, `useAnnouncementNoteManager.js` and `utils/announcementNote.js`.
+- Orphaned `og-worker`.
+- `/policy` alias.
+- Empty `app-argument=`.
+- Ten API 301s in `_redirects`. `/health` still returns 301 to `api.toifood.co.nz/health`, and that 301 also carries `no-store`.
+- Hardcoded `https://api.toifood.co.nz` in `functions/sitemap.xml.js` and `og-worker/src/index.js`.
+- Stale branches.
+- No README, CI or tests.
+
+**Suggested order (revised):**
+1. Fix `robots.txt` (one line, now confirmed correct) and add `sitemap-pages.xml`.
+2. Scope `_headers`: limit `no-store` to HTML, add `Content-Type: application/json` for AASA, and exempt `/.well-known/*`.
+3. Set `--primary` back to `#96cf24`.
+4. Add a `/recipe/*` 301 to `app.toifood.co.nz/recipe/:splat` and a NotFound route.
+5. Make the OG URLs absolute.
+6. One cleanup commit covering `dist/`, Americana, ionicons, `AnnouncementNote*` and the stale branches.
 ## ISSUE:ARCHITECTURE 2026-10-12 10:41 ▸ Still no commits since `626e222` (58 days). Every live finding from 2026-10-05 is unchanged in production. This pass also found two new problems: the proposed `robots.txt` fix would not work, because the `toifood.co.nz` sitemap lists only `app.toifood.co.nz` URLs, and the AASA file is served as `application/octet-stream`
 
 This entry updates and supersedes the 2026-10-05 10:05 entry below. Re-audit: `gh api repos/toifood/ts-toifood-web/compare/626e222...main` → `total_commits: 0`. `pushed_at` is still `2026-08-15T11:06:46Z`. There are no PRs. Branches `1-1-2` and `1-1-3` are still at `4bbf230`. All twelve committed `frontend/dist/` files are still tracked. The live site at `toifood.co.nz` was re-checked with `curl`.
