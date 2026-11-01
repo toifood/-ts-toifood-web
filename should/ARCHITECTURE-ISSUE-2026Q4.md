@@ -11,6 +11,26 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-11-02 10:52 ▸ Still no commits since `626e222` (79 days, `pushed_at` 2026-08-15T11:06:46Z). Every finding from the 2026-10-19 entry is still live. Nothing has moved in two weeks, so the one-line `robots.txt` fix and the `_headers` scoping are still the cheapest open wins
+
+This entry updates the 2026-10-19 09:22 entry in place and changes none of its conclusions. Re-audit on 2026-11-02:
+- `gh api repos/toifood/ts-toifood-web/compare/626e222...main` returns `total_commits: 0`.
+- The deployed bundle is still `assets/index-C5Rnj4h4.js`, so there has been no redeploy.
+- `/hero-char.png` is still served `no-store, no-cache, must-revalidate, s-maxage=0`.
+- `/sitemap.xml` still returns 538 `<loc>` entries, so the proxy to `api.toifood.co.nz` is healthy.
+- `https://toifood.co.nz/robots.txt` still lacks the corrected `Sitemap: https://toifood.co.nz/sitemap.xml` line. I did not re-check the `app.toifood.co.nz` robots.txt on this pass.
+
+**Open items, in priority order (unchanged):**
+1. In `frontend/public/robots.txt`, replace the `Sitemap:` line with `https://toifood.co.nz/sitemap.xml`. Add `frontend/public/sitemap-pages.xml` for `/`, `/faq`, `/privacy`, `/terms` and `/contact`, and list it as a second `Sitemap:` line.
+2. Scope the `_headers` rules. `/*` `no-store` should apply only to HTML. Hashed `/assets/*` should be `immutable` without `no-store`. Images and fonts need a finite `max-age`. Serve `/.well-known/apple-app-site-association` as `application/json`.
+3. Add `og:url`, a canonical link, and an absolute `og:image` to `frontend/index.html`.
+4. Replace `REPLACE_WITH_SHA256_FROM_PLAY_CONSOLE` in `assetlinks.json`.
+5. Stop tracking `frontend/dist/` (12 files) and add `.gitignore`. Delete `Americana.otf` together with its `@font-face` in `global.css:3-9`.
+6. Remove the dead `AnnouncementNote*`, `useAnnouncementNoteManager.js` and `utils/announcementNote.js`, along with the unpkg Ionicons load. Fix `--primary` equalling `--bg` (`global.css:19-20`).
+7. Decide what to do with the orphaned `og-worker`: wire it up or delete it. Decide whether `functions/sitemap.xml.js` gets a comment naming its dependency from `ts-toifood-app`.
+8. Housekeeping: delete stale branches `1-1-2` and `1-1-3`, and add a README, CI and a smoke test. Move the hardcoded `https://api.toifood.co.nz` into configuration.
+
+**Process risk:** this repo has had no activity for 79 days while production holds known SEO and caching defects. Items 1 and 2 are small, so they could ship as one PR with a Pages redeploy.
 ## ISSUE:ARCHITECTURE 2026-10-19 09:22 ▸ Still no commits since `626e222` (65 days), and every live finding from 2026-10-12 is still present in production. Correction: the cross-host sitemap problem raised on 2026-10-12 is already solved upstream. `ts-toifood-app/public/robots.txt` has cross-submitted `https://toifood.co.nz/sitemap.xml` since 2026-08-02 (`4e0041c`), so the one-line `robots.txt` fix in this repo is valid after all
 
 This entry updates and supersedes the 2026-10-12 10:41 entry below. Re-audit:
