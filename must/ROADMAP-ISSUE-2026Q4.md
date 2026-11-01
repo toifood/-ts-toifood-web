@@ -11,6 +11,19 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ROADMAP 2026-11-02 10:40 ▸ main still at 626e2224 (79 days, no commits). All seven open gaps carry over unchanged
+
+`main` HEAD is still `626e2224` (2026-08-15T11:06Z, "feat: homepage avocado hero, floating navbar, email cleanup"). That is 79 days with no commits. The tree is byte-identical to the one read on 2026-10-19, so every finding in that entry still holds. I did not re-read the individual files today. This updates the 2026-10-19 entry, and the item numbers are unchanged.
+
+1. **Pricing disclosure gap: still open.** `frontend/src/pages/Terms.jsx` line 21 says "Contact us for details on available premium tiers and pricing." Line 7 reads "Last updated: April 2026", so the terms are now about seven months old. `FAQ.jsx` lines 9–10 (`premium`, `generation-limit`) describe a live, metered Premium tier, and no price appears anywhere on the site.
+2. **Hard-coded rate limits: still open.** `FAQ.jsx` lines 9–10 state the quotas as static JSX: free users get 2 Premium and 3 Basic recipes per hour, and Premium users get 5 Claude and 10 Basic. `_redirects` line 10 proxies `/app-config` to `api.toifood.co.nz`, but the FAQ does not read from it.
+3. **og-worker orphaned: still open.** Nothing calls `og-worker/`. The header comment in `frontend/functions/sitemap.xml.js` still refers to `functions/recipe/[token].js`, which was deleted on 2026-08-02.
+4. **assetlinks fingerprint placeholder: still open.** `frontend/public/.well-known/assetlinks.json` still has `sha256_cert_fingerprints: ["REPLACE_WITH_SHA256_FROM_PLAY_CONSOLE"]`, so Android App Links for `com.toifood.app` cannot verify.
+5. **AASA points at a removed route: still open.** `frontend/public/.well-known/apple-app-site-association` claims `/recipe/*`, but `App.jsx` has no such route.
+6. **AnnouncementNote stack orphaned: still open.** Nothing imports `AnnouncementNote.jsx`/`.css`, `useAnnouncementNoteManager.js` or `utils/announcementNote.js`.
+7. **No 404 route: still open.** `App.jsx` has no `path="*"` route, and `_redirects` line 11 (`/* /index.html 200`) returns a 200 for every unknown URL. Search engines treat that as a soft 404. This also worsens item 5, because `/recipe/*` links show an empty page.
+
+**Priority note:** the order is unchanged. Items 4, 5 and 7 break the mobile share and deep-link flow in production today. Items 1 and 2 are a disclosure risk while Premium is advertised as live. Items 3 and 6 are dead-code cleanup. With no commits for 79 days, none of these has an owner.
 ## ISSUE:ROADMAP 2026-10-19 09:04 ▸ main still at 626e2224 (65 days, no commits). All six Q4 gaps remain open, and the Q3 "no 404 route" gap is back on the list because it was never fixed
 
 `main` HEAD is still `626e2224` (2026-08-15T11:06Z, "feat: homepage avocado hero, floating navbar, email cleanup"). `compare/626e2224...main` returns `ahead_by: 0` with no changed files. This updates the 2026-10-12 entry. I re-read every item below from source on `main` today.
