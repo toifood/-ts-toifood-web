@@ -11,6 +11,23 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ROADMAP 2026-11-02 10:40 ▸ Q4 baseline unchanged at 626e2224 (79 days, no commits). Shipped surface is the same, and deep linking, AI-safety messaging, og-worker and 404 handling stay off the asset list
+
+`main` is still at `626e2224` (2026-08-15), and the tree is identical to the one read on 2026-10-19. I did not re-read the individual files today. The baseline from that entry still holds:
+
+- **Marketing site:** `App.jsx` serves 6 routes: `/`, `/privacy`, `/policy` (alias for Privacy), `/terms`, `/faq`, `/contact`. `Navbar`, `Footer` and `ScrollToTop` are unchanged.
+- **Generation tiers advertised:** `FAQ.jsx` lines 9–10 and the `Home.jsx` feature grid advertise Basic (local model) and Premium (Claude by Anthropic) with hourly quotas. The gaps are tracked in ROADMAP ISSUE items 1–2.
+- **Store distribution:** the App Store (`id6761888929`) and Google Play (`com.toifood.app`) links are live on `Home.jsx`.
+- **Account deletion disclosed:** `FAQ.jsx` (`delete-account`) documents Profile → Settings → Account → Delete Account, plus email to success@toifood.co.nz.
+- **Contact:** `Contact.jsx` has a `mailto:success@toifood.co.nz` CTA.
+- **Legal docs:** `Terms.jsx` (Last updated: April 2026) and `Privacy.jsx` (Last updated: 11 May 2026) are unchanged. `Terms.jsx` is now about seven months old.
+- **Infra:** `_redirects` has its 10 API proxy rules to `api.toifood.co.nz` plus the SPA catch-all. `functions/sitemap.xml.js` re-serves the backend sitemap. `_headers`, `robots.txt` and the React 18 + Vite 5 + React Router 6 stack on Cloudflare Pages are unchanged.
+
+**Still excluded from the asset baseline** (code is present but not functional; see ROADMAP ISSUE items 3–7):
+- **Universal/App Links:** the assetlinks SHA-256 is a placeholder, and the AASA `/recipe/*` path has no web route behind it.
+- **Allergen WARNING / dietary HEADSUP notes:** nothing imports them.
+- **og-worker share cards:** nothing calls the worker.
+- **Not-found handling:** no `*` route exists, so unknown URLs return an empty 200 page.
 ## ASSET:ROADMAP 2026-10-19 09:04 ▸ Q4 baseline re-confirmed at 626e2224 (65 days, no commits). Shipped surface is unchanged, and deep linking, AI-safety messaging and og-worker stay off the asset list
 
 `main` is still at `626e2224` (2026-08-15), and `compare/626e2224...main` shows 0 commits since. I re-read the 2026-10-12 baseline from source today and it still holds:
