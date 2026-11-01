@@ -11,6 +11,33 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ARCHITECTURE 2026-11-02 10:52 ▸ Architecture unchanged at `main` HEAD `626e222` (79 days). Production is still bundle `index-C5Rnj4h4.js`, the sitemap proxy is healthy (538 URLs), and the redeploy-only recovery procedure from 2026-10-05 still holds
+
+This entry reconfirms the 2026-10-05 10:05 baseline and changes no architecture decisions.
+
+**State re-verified on 2026-11-02**
+- The `compare/626e222...main` check shows 0 commits. `pushed_at` is 2026-08-15T11:06:46Z.
+- `toifood-web` (Cloudflare Pages, `frontend/`) is a React 18 + Vite 5 + react-router-dom 6 marketing site with no TypeScript. `toifood-og` (Worker, `og-worker/`) has no bindings, secrets or callers.
+- Neither service has a database, Prisma schema or server-side state.
+- Production serves `assets/index-C5Rnj4h4.js`. That is not the stale committed `frontend/dist/` bundle.
+- `/sitemap.xml` is served by `functions/sitemap.xml.js`, proxying `api.toifood.co.nz/sitemap.xml`. It returned 538 `<loc>` entries.
+- `/` and `/hero-char.png` are both served `no-store, no-cache, must-revalidate, s-maxage=0`. The `_headers` defect is still live.
+
+**Ownership boundaries (unchanged)**
+- `toifood.co.nz` (this repo): marketing pages, `.well-known` deep-link files, the sitemap proxy, and the API-path 301 shims.
+- `app.toifood.co.nz` (`ts-toifood-app`): recipe pages and the cross-submitted `Sitemap:` line in its `robots.txt`.
+- `api.toifood.co.nz` (`ts-toifood-back`): the sitemap source and every endpoint the `_redirects` 301s target.
+
+**Recovery procedure (stateless, redeploy-only)**
+1. `toifood-web`: in `frontend/`, run `npm ci && npm run build`, then deploy the fresh `dist/` to Pages project `toifood-web`. Never deploy the committed `frontend/dist/`.
+2. `toifood-og`: in `og-worker/`, run `npm ci && npx wrangler deploy`.
+3. Verify:
+   - `/`, `/faq` and `/privacy` return the SPA.
+   - The deployed `assets/index-*.js` hash matches the local build.
+   - `/sitemap.xml` returns `application/xml` with a non-zero `<loc>` count. A zero count or an HTML body means the upstream API is down, not this deployment.
+   - `/health` returns 301 to `api.toifood.co.nz`.
+   - `/.well-known/apple-app-site-association` returns JSON.
+4. Rollback: roll back to a previous deployment in Cloudflare Pages. Nothing needs to be restored.
 ## ASSET:ARCHITECTURE 2026-10-19 09:22 ▸ `main` HEAD `626e222` unchanged (65 days). Live state re-verified with no drift, and the deployed bundle is still `index-C5Rnj4h4.js`. The cross-repo sitemap contract is now documented: `ts-toifood-app/public/robots.txt` (since `4e0041c`, 2026-08-02) declares this repo's `/sitemap.xml` proxy, which makes the proxy load-bearing for app-host SEO
 
 This entry updates the 2026-10-12 10:41 entry below. `gh api repos/toifood/ts-toifood-web/compare/626e222...main` returns 0 commits. `main` is at `626e222`; `1-1-2` and `1-1-3` are at `4bbf230`. There are no PRs or tags. The source architecture has not changed:
