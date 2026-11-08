@@ -11,6 +11,20 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ISSUE:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ISSUE:ARCHITECTURE 2026-11-09 10:52 ▸ Still no commits since `626e222` (86 days, `pushed_at` 2026-08-15T11:06:46Z). The `robots.txt` Sitemap line still points at `app.toifood.co.nz` and `/hero-char.png` is still `no-store`. Every finding from the 2026-11-02 entry is still live.
+
+This entry updates the 2026-11-02 10:52 entry in place and changes none of its conclusions. Re-audit on 2026-11-09:
+- `gh api repos/toifood/ts-toifood-web/compare/626e222...main` returns `total_commits: 0`.
+- The deployed bundle is still `assets/index-C5Rnj4h4.js`, so there has been no redeploy.
+- `https://toifood.co.nz/robots.txt` still ends with `Sitemap: https://app.toifood.co.nz/sitemap.xml`. This is the host mismatch, and it was not fixed.
+- `/hero-char.png` is still served `no-store, no-cache, must-revalidate, s-maxage=0`.
+- I did not re-check the sitemap entry count (538 on 2026-11-02) or the AASA content type on this pass.
+
+**Open items, in priority order (unchanged):**
+1. In `frontend/public/robots.txt`, replace the `Sitemap:` line with `https://toifood.co.nz/sitemap.xml`. Add `frontend/public/sitemap-pages.xml` for `/`, `/faq`, `/privacy`, `/terms` and `/contact`, and list it as a second `Sitemap:` line.
+2. Scope the `_headers` rules. `/*` `no-store` should apply only to HTML. Hashed `/assets/*` should be `immutable` without `no-store`. Images and fonts need a finite `max-age`. Serve `/.well-known/apple-app-site-association` as `application/json`.
+
+The remaining open items from the 2026-11-02 entry are unchanged. Nothing has moved in three weeks, so the one-line `robots.txt` fix and the `_headers` scoping are still the cheapest open wins.
 ## ISSUE:ARCHITECTURE 2026-11-02 10:52 ▸ Still no commits since `626e222` (79 days, `pushed_at` 2026-08-15T11:06:46Z). Every finding from the 2026-10-19 entry is still live. Nothing has moved in two weeks, so the one-line `robots.txt` fix and the `_headers` scoping are still the cheapest open wins
 
 This entry updates the 2026-10-19 09:22 entry in place and changes none of its conclusions. Re-audit on 2026-11-02:
