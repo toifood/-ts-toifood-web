@@ -11,6 +11,17 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ARCHITECTURE 2026-11-09 10:52 ▸ Architecture unchanged at `main` HEAD `626e222` (86 days). Production is still bundle `index-C5Rnj4h4.js`. Re-verified on 2026-11-09: no new commits, `robots.txt` Sitemap line still on `app.toifood.co.nz`, and `/hero-char.png` still `no-store`.
+
+This entry updates the 2026-11-02 10:52 entry in place. The architecture is unchanged: a stateless two-service Cloudflare setup, with the `toifood-web` Pages marketing site proxying `/sitemap.xml` to `api.toifood.co.nz`.
+
+Verified on 2026-11-09:
+- `compare/626e222...main` returns 0 commits.
+- The deployed bundle is `assets/index-C5Rnj4h4.js`.
+- `/hero-char.png` returns `Cache-Control: no-store, no-cache, must-revalidate, s-maxage=0`.
+- `/robots.txt` still carries `Sitemap: https://app.toifood.co.nz/sitemap.xml`.
+
+I did not re-check the sitemap entry count (538 on 2026-11-02) or the AASA content type on this pass. Both are carried forward from the 2026-11-02 entry as last known state. The recovery procedure and migration state in that entry are unchanged.
 ## ASSET:ARCHITECTURE 2026-11-02 10:52 ▸ Architecture unchanged at `main` HEAD `626e222` (79 days). Production is still bundle `index-C5Rnj4h4.js`, the sitemap proxy is healthy (538 URLs), and the redeploy-only recovery procedure from 2026-10-05 still holds
 
 This entry reconfirms the 2026-10-05 10:05 baseline and changes no architecture decisions.
