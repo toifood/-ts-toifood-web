@@ -11,6 +11,17 @@ ADD NEW ENTRIES AT THE TOP FOR NEW TOPICS; UPDATE IN PLACE FOR EXISTING ONES.
 FORMAT: ## ASSET:{NAME} {YYYY-MM-DD HH:MM} → {CONTENT}
 
 ####### <!-- ANCHOR MARKER - ADD OR UPDATE ENTRIES DIRECTLY BELOW THIS LINE -->
+## ASSET:ARCHITECTURE 2026-11-16 11:39 ▸ Architecture is unchanged since `626e222` (93 days idle). It is a Vite/React SPA on Cloudflare Pages, with a sitemap proxy function and static headers and redirects.
+
+This entry updates the earlier Q4 asset entries in place. The decisions below were re-verified on 2026-11-16.
+
+- **Hosting and build:** `frontend/` is a Vite/React SPA served from Cloudflare Pages. The live bundle is `assets/index-C5Rnj4h4.js`, and it has not been redeployed since at least 2026-10-05.
+- **Edge layer:** `frontend/public/_headers` and `_redirects` drive caching and the API 301s. `frontend/functions/sitemap.xml.js` proxies the sitemap from `api.toifood.co.nz`. It is load-bearing for `ts-toifood-app` SEO, because that repo's `robots.txt` cross-submits `https://toifood.co.nz/sitemap.xml`. Do not move it.
+- **Repo relationships:** the 538 recipe URLs live on `app.toifood.co.nz` (owned by `ts-toifood-app`). This repo owns only the marketing pages and the sitemap proxy.
+- **Recovery:** the committed `frontend/dist/` differs from what is deployed, so it is not a reliable rollback source. Recovery today means rebuilding from `main` at `626e222`.
+- **Migration state:** there is no migration in flight. The repo is dormant, with 0 commits ahead of `626e222` and no PRs.
+
+The open defects are tracked in the matching ISSUE entry of the same date.
 ## ASSET:ARCHITECTURE 2026-11-09 10:52 ▸ Architecture unchanged at `main` HEAD `626e222` (86 days). Production is still bundle `index-C5Rnj4h4.js`. Re-verified on 2026-11-09: no new commits, `robots.txt` Sitemap line still on `app.toifood.co.nz`, and `/hero-char.png` still `no-store`.
 
 This entry updates the 2026-11-02 10:52 entry in place. The architecture is unchanged: a stateless two-service Cloudflare setup, with the `toifood-web` Pages marketing site proxying `/sitemap.xml` to `api.toifood.co.nz`.
